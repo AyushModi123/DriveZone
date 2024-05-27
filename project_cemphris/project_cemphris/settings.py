@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'base.apps.BaseConfig',
+    'chat.apps.ChatConfig',
+    'rate.apps.RateConfig',
+    'history.apps.HistoryConfig',
 ]
 
 AUTH_USER_MODEL = 'base.User'
