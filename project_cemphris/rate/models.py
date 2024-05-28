@@ -8,7 +8,7 @@ class RatingChoices(models.IntegerChoices):
     FIVE_STARS = 5
 
 class Rating(models.Model):
-    instructor = models.OneToOneField('base.instructor', on_delete=models.CASCADE)
+    instructor = models.OneToOneField('base.instructor', on_delete=models.CASCADE, related_name='rating')
     rating = models.IntegerField(choices=RatingChoices.choices)
 
     def __str__(self):

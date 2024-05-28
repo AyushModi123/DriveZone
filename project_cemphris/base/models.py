@@ -12,13 +12,12 @@ class User(AbstractUser):
 
 class Learner(models.Model):
     user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='learner')
-    # Add learner-specific fields here
 
     def __str__(self):
         return self.user.username
 
 class Instructor(models.Model):
-    user: User = models.OneToOneField('User', on_delete=models.CASCADE, related_name='instructor')
+    user: User = models.OneToOneField('User', on_delete=models.CASCADE, related_name='instructor')    
 
     def __str__(self):
         return self.user.username
