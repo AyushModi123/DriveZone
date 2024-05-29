@@ -12,5 +12,5 @@ class Rating(models.Model):
     rating = models.IntegerField(choices=RatingChoices.choices)
 
     def __str__(self):
-        return f"{self.instructor}'s Rating: {self.rating}"
+        return f"{self.instructor}'s Rating: {self.get_rating_display()}"
 

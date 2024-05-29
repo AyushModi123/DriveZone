@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'jwt_auth.apps.JwtAuthConfig',
     'vehicle.apps.VehicleConfig',
     'book.apps.BookConfig',
+    'slot.apps.SlotConfig',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
