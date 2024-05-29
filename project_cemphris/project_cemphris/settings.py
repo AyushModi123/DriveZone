@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'history.apps.HistoryConfig',
     'payment.apps.PaymentConfig',
     'jwt_auth.apps.JwtAuthConfig',
+    'vehicle.apps.VehicleConfig',
+    'book.apps.BookConfig',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',

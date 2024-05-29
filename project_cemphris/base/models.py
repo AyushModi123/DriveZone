@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     email = models.EmailField(unique=True, null=True)
-
+    location = models.CharField(max_length=2000, null=True, blank=True)
     # avatar = models.ImageField(null=True, default="avatar.svg")
 
     USERNAME_FIELD = 'email'
