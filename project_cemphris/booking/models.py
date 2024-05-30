@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class Book(models.Model):
+class Booking(models.Model):
     instructor = models.ForeignKey('base.Instructor', on_delete=models.CASCADE, related_name='booking')
     learner = models.ForeignKey('base.Learner', on_delete=models.CASCADE, related_name='booking')
     payment = models.ForeignKey('payment.Payment', on_delete=models.CASCADE, related_name='booking')

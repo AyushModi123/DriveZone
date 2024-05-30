@@ -9,13 +9,13 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('book', '0001_initial'),
+        ('booking', '0001_initial'),
         ('payment', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='book',
+            model_name='booking',
             name='payment',
             field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='booking', to='payment.payment'),
         ),

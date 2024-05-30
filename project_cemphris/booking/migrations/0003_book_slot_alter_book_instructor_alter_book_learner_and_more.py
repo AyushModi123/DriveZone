@@ -8,29 +8,29 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('base', '0003_user_location'),
-        ('book', '0002_initial'),
+        ('booking', '0002_initial'),
         ('payment', '0002_alter_payment_learner'),
         ('slot', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='book',
+            model_name='booking',
             name='slot',
             field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='booking', to='slot.slot'),
         ),
         migrations.AlterField(
-            model_name='book',
+            model_name='booking',
             name='instructor',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='booking', to='base.instructor'),
         ),
         migrations.AlterField(
-            model_name='book',
+            model_name='booking',
             name='learner',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='booking', to='base.learner'),
         ),
         migrations.AlterField(
-            model_name='book',
+            model_name='booking',
             name='payment',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='booking', to='payment.payment'),
         ),

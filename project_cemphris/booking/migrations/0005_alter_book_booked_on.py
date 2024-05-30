@@ -6,12 +6,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('book', '0004_alter_book_table'),
+        ('booking', '0004_alter_book_table'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='book',
+            model_name='booking',
             name='booked_on',
             field=models.DateTimeField(auto_created=True, auto_now=True),
         ),

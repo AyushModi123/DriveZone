@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'payment.apps.PaymentConfig',
     'jwt_auth.apps.JwtAuthConfig',
     'vehicle.apps.VehicleConfig',
-    'book.apps.BookConfig',
+    'booking.apps.BookConfig',
     'slot.apps.SlotConfig',
     'rest_framework',
     'rest_framework_simplejwt',
