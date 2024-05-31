@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.core.exceptions import ObjectDoesNotExist
 
 class User(AbstractUser):
     email = models.EmailField(unique=True, null=True)
@@ -9,6 +9,20 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+
+    @property
+    def is_learner(self):
+        try:
+            return bool(self.learner)
+        except ObjectDoesNotExist:
+            return False
+    
+    @property
+    def is_instructor(self):
+        try:
+            return bool(self.instructor)
+        except ObjectDoesNotExist:
+            return False
 
 class Learner(models.Model):
     user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='learner')
