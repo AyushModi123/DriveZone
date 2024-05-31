@@ -8,7 +8,6 @@ COPY . .
 # Install dependencies
 RUN pip install --no-cache-dir -r ./requirements.txt
 
-RUN python manage.py collectstatic --no-input
 # Expose the port on which the Django app will run
 EXPOSE 8000
 
