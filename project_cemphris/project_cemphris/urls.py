@@ -22,5 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include('base.api.urls')),
     path('api/auth/', include('jwt_auth.urls')),
-    path('api/book/', include('booking.api.urls')),
+    path('api/bookings/', include('booking.api.urls')),
 ]
