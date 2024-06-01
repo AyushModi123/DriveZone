@@ -8,3 +8,4 @@ mysqlclient==2.2.4
 djangorestframework
 djangorestframework_simplejwt
 psycopg2-binary==2.9.9
+django-payments-razorpay

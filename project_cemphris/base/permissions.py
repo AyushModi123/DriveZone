@@ -1,5 +1,4 @@
 from rest_framework.permissions import BasePermission, IsAuthenticated
-from django.core.exceptions import ObjectDoesNotExist
 
 class IsActivePermission(BasePermission):
     """
@@ -14,10 +13,7 @@ class IsInstructorPermission(IsAuthenticated, IsActivePermission):
     """
     def has_permission(self, request, view):
         if super().has_permission(request, view):
-            try:
-                return bool( request.user.instructor)                
-            except ObjectDoesNotExist:
-                return False
+            return request.user.is_instructor
     
 class IsLearnerPermission(IsAuthenticated, IsActivePermission):
     """
@@ -25,7 +21,4 @@ class IsLearnerPermission(IsAuthenticated, IsActivePermission):
     """
     def has_permission(self, request, view):
         if super().has_permission(request, view):
-            try:
-                return bool(request.user.learner)                
-            except ObjectDoesNotExist:
-                return False
+            return request.user.is_learner

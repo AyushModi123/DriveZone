@@ -153,6 +153,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static_files'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -180,3 +181,8 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+# PAYMENT_VARIANTS = {
+#     'razorpay': ('django_payments_razorpay.RazorPayProvider', {
+#         'public_key': 'RAZORPAY_PUBLIC_KEY',
+#         'secret_key': 'RAZORPAY_SECRET_KEY'})}
