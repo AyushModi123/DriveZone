@@ -11,6 +11,7 @@ class Vehicle(models.Model):
     # image = models.ImageField(null=True, default="avatar.svg")
     model = models.CharField(max_length=50, null=True, blank=True)
     make = models.IntegerField(choices=VehicleChoices.choices)
+    license_no = models.CharField(max_length=10, null=False, blank=False, default='XX000000')
 
     def __str__(self):
         return f"{self.get_make_display()} with model {self.model}"
