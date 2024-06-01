@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 class User(AbstractUser):
     email = models.EmailField(unique=True, null=True)
     location = models.CharField(max_length=2000, null=True, blank=True)
-    # avatar = models.ImageField(null=True, default="avatar.svg")
+    image_url = models.URLField(null=False, blank=True, default='')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

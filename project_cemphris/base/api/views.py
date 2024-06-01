@@ -4,10 +4,10 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
 from django.shortcuts import redirect
+from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, send_activation_mail
 from .serializers import UserSerializer
 from base.models import Instructor, Learner
-
 
 User = get_user_model()
 
@@ -21,10 +21,17 @@ def signup(request):
         user_type = request.data.get('user_type', None)
         if user_type == 'instructor':
             instructor = Instructor.objects.create(user=user)
+            instructor.save()
         elif user_type == 'learner':
             learner = Learner.objects.create(user=user)
+            learner.save()
         else:
             return Response({'msg': 'Invalid user type'}, status=400)
+        image_file = request.FILES.get('image', None)
+        if image_file:
+            img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+            user.image_url = img_url
+            user.save()
         send_activation_mail(request, user)
         return Response({
             'user': UserSerializer(user, context={'request': request}).data,
@@ -52,6 +59,17 @@ def activate_account(request, uidb64, token):
                 return Response("Account Activated Successfully", status=200)
     return Response("Invalid Activation", status=400)
 
+@api_view(['POST'])
+def upload_image(request):
+    current_user = request.user
+    image_file = request.FILES.get('image', None)    
+    if image_file:
+        img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+        current_user.image_url = img_url
+        current_user.save()
+        return Response({'message': 'Image Uploaded', 'user_id': current_user.id}, status=200)
+    else:
+        return Response({'error': 'Invalid Image File'}, status=400)
 
 @api_view(['GET'])
 def check_api(request):
