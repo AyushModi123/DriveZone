@@ -1,8 +1,9 @@
 import firebase_admin
 from firebase_admin import credentials, storage
 from abc import ABC, abstractmethod
+import os
 
-cred = credentials.Certificate(r"C:\Users\ayush\Downloads\project-cemphris-firebase-adminsdk-f3oi6-cc4dec7871.json")
+cred = credentials.Certificate(os.environ.get("FIREBASE_PRIVATE_KEY_PATH"))
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'project-cemphris.appspot.com'
 })
