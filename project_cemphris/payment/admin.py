@@ -1,6 +1,6 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import PaymentHistory
+from .models import Payment
 
-admin.site.register(PaymentHistory)
+admin.site.register(Payment)
