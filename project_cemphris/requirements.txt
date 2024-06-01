@@ -9,3 +9,6 @@ djangorestframework
 djangorestframework_simplejwt
 psycopg2-binary==2.9.9
 django-payments-razorpay
+drf-yasg
+setuptools==70.0.
+django-rest-swagger

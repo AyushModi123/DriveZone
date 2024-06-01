@@ -49,11 +49,13 @@ INSTALLED_APPS = [
     'jwt_auth.apps.JwtAuthConfig',
     'vehicle.apps.VehicleConfig',
     'booking.apps.BookConfig',
-    'slot.apps.SlotConfig',
+    'slot.apps.SlotConfig',    
+    'rest_framework_swagger',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
     'channels',
+    'drf_yasg',
 ]
 
 
@@ -153,6 +155,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'https://project-cemphris-static.onrender.com/'
+# STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static_files'
 
 # Default primary key field type
