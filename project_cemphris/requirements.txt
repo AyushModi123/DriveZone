@@ -12,3 +12,5 @@ django-payments-razorpay
 drf-yasg
 setuptools==70.0.
 django-rest-swagger
+firebase-admin
+Pillow

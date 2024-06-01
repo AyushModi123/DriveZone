@@ -4,14 +4,25 @@ from base.permissions import IsInstructorPermission, IsLearnerPermission
 from base.models import User
 from vehicle.models import Vehicle
 from .serializers import InstructorVehicleSerializer, LearnerVehicleSerializer
+from firebase_utils import FirebaseUploadImage
 
 @api_view(['POST'])
 @permission_classes([IsInstructorPermission])
 def create_vehicle(request):
     serializer = InstructorVehicleSerializer(data=request.data)
     if serializer.is_valid():
-        vehicle = serializer.save()
-        return Response('Vehicle Saved', status=201)
+        image_file = request.FILES.get('image', None)
+        if image_file:
+            img_url = FirebaseUploadImage.upload_image(image_file, 'vehicles')
+            vehicle = serializer.save(
+                image_url=img_url, 
+                instructor=request.user.instructor
+            )
+        else:
+            vehicle = serializer.save(
+                instructor=request.user.instructor
+            )
+        return Response({'message': 'Vehicle Saved', 'vehicle_id': vehicle.id}, status=201)
     return Response(serializer.errors, status=400)
 
 @api_view(['GET'])
@@ -38,3 +49,21 @@ def get_vehicle(request):
         )
     else:
         pass
+
+
+@api_view(['POST'])
+@permission_classes([IsInstructorPermission])
+def upload_image(request):
+    image_file = request.FILES.get('image', None)
+    vehicle_id = request.GET.get('vehicle_id', None) #Query Params
+    if image_file:
+        try:            
+            vehicle = Vehicle.objects.get(id=vehicle_id)
+        except Vehicle.DoesNotExist:
+            return Response({'error': 'Invalid Vehicle Id'}, status=400)
+        img_url = FirebaseUploadImage.upload_image(image_file, 'vehicles')
+        vehicle.image_url = img_url
+        vehicle.save()
+        return Response({'message': 'Image Uploaded', 'vehicle_id': vehicle.id}, status=200)
+    else:
+        return Response({'error': 'Invalid Image File'}, status=400)
