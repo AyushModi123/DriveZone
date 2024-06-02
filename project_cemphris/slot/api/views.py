@@ -1,10 +1,15 @@
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
 from base.permissions import IsInstructorPermission, IsLearnerPermission, RequiredProfileCompletionPermission
 from base.models import User, ProfileCompletionLevelChoices
 from slot.models import Slot
 from .serializers import SlotSerializer, SemiSlotSerializer
 
+@swagger_auto_schema(
+    method='post',
+    request_body=SlotSerializer,    
+)
 @api_view(['POST'])
 @permission_classes([IsInstructorPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.COMPLETE)])
 def create_slot(request):

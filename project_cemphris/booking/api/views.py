@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
 from base.permissions import IsLearnerPermission, RequiredProfileCompletionPermission
 from .serializers import BookingSerializer
 from booking.models import Booking
@@ -21,7 +22,11 @@ def get_bookings(request):
             return Response(serializer.data)
         except Learner.DoesNotExist:
             return Response({'msg': 'User has no associated Learner or Instructor'}, status=404)
-    
+
+@swagger_auto_schema(
+    method='post',
+    request_body=BookingSerializer,    
+)
 @api_view(['POST'])
 @permission_classes([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.COMPLETE)])
 def create_booking(request):

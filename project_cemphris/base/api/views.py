@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
+from drf_yasg.utils import swagger_auto_schema
 from base.permissions import RequiredProfileCompletionPermission, IsInstructorPermission
 from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, send_activation_mail
@@ -11,6 +12,10 @@ from base.models import Instructor, Learner, ProfileCompletionLevelChoices
 
 User = get_user_model()
 
+@swagger_auto_schema(
+    method='post',
+    request_body=UserSerializer,    
+)
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([])
@@ -87,6 +92,10 @@ def update_details(request):
         return Response({"message": "Details Updated Successfully"}, status=200)
     return Response(serializer.errors, status=400)
 
+@swagger_auto_schema(
+    method='put',
+    request_body=LicenseInformationSerializer,    
+)
 @api_view(['PUT'])
 def update_license(request):
     current_user = request.user

@@ -1,11 +1,17 @@
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
 from base.permissions import IsInstructorPermission, IsLearnerPermission, RequiredProfileCompletionPermission
 from base.models import User, ProfileCompletionLevelChoices
 from vehicle.models import Vehicle
 from .serializers import InstructorVehicleSerializer, LearnerVehicleSerializer
 from firebase_utils import FirebaseUploadImage
 
+
+@swagger_auto_schema(
+    method='post',
+    request_body=InstructorVehicleSerializer,    
+)
 @api_view(['POST'])
 @permission_classes([IsInstructorPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.BASIC)])
 def create_vehicle(request):
@@ -52,7 +58,7 @@ def get_vehicle(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsInstructorPermission, RequiredProfileCompletionPermission(required_level=40)])
+@permission_classes([IsInstructorPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.BASIC)])
 def upload_image(request):
     image_file = request.FILES.get('image', None)
     vehicle_id = request.GET.get('vehicle_id', None) #Query Params
