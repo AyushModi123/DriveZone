@@ -6,4 +6,4 @@ from booking.models import Booking
 class BookingSerializer(ModelSerializer):
     class Meta:
         model = Booking
-        exclude = ('booked_on')
+        exclude = ('booked_on', )
