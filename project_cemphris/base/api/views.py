@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
-from django.shortcuts import redirect
+from base.permissions import RequiredProfileCompletionPermission
 from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, send_activation_mail
 from .serializers import UserSerializer
-from base.models import Instructor, Learner
+from base.models import Instructor, Learner, ProfileCompletionLevelChoices
 
 User = get_user_model()
 
@@ -60,6 +60,7 @@ def activate_account(request, uidb64, token):
     return Response("Invalid Activation", status=400)
 
 @api_view(['POST'])
+@permission_classes([RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.BASIC)])
 def upload_image(request):
     current_user = request.user
     image_file = request.FILES.get('image', None)    

@@ -14,6 +14,7 @@ class IsInstructorPermission(IsAuthenticated, IsActivePermission):
     def has_permission(self, request, view):
         if super().has_permission(request, view):
             return request.user.is_instructor
+        return False
     
 class IsLearnerPermission(IsAuthenticated, IsActivePermission):
     """
@@ -22,3 +23,23 @@ class IsLearnerPermission(IsAuthenticated, IsActivePermission):
     def has_permission(self, request, view):
         if super().has_permission(request, view):
             return request.user.is_learner
+        return False
+    
+class RequiredProfileCompletionPermission(IsAuthenticated, IsActivePermission):
+    """
+    Allows access only to authenticated, active users with the required profile completion level.
+    """
+    def __init__(self, required_level):
+        self.required_level = required_level
+    
+    def __call__(self):
+        """
+        This method is necessary so that arguments can be passed in permission.
+        """
+        return self
+    
+    def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            user_completion_level = request.user.profile_completion_level
+            return user_completion_level >= self.required_level.value
+        return False

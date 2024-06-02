@@ -1,15 +1,15 @@
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
-from base.permissions import IsInstructorPermission, IsLearnerPermission
-from base.models import User
+from base.permissions import IsInstructorPermission, IsLearnerPermission, RequiredProfileCompletionPermission
+from base.models import User, ProfileCompletionLevelChoices
 from rate.models import Rating
 
 
 @api_view(['POST'])
-@permission_classes([IsLearnerPermission])
+@permission_classes([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.BASIC)])
 def rate_instructor(request):
-    rating = request.GET.get('rating', None)
-    instructor_username = request.GET.get('username', None)
+    rating = request.POST.get('rating', None)
+    instructor_username = request.POST.get('username', None)
     try:
         user = User.objects.get(username=instructor_username)
     except User.DoesNotExist:

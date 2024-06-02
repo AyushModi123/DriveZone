@@ -1,8 +1,9 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
+from base.permissions import IsLearnerPermission, RequiredProfileCompletionPermission
 from .serializers import BookingSerializer
 from booking.models import Booking
-from base.models import Learner, Instructor
+from base.models import Learner, Instructor, ProfileCompletionLevelChoices
 
 @api_view(['GET'])
 def get_bookings(request):    
@@ -22,6 +23,7 @@ def get_bookings(request):
             return Response({'msg': 'User has no associated Learner or Instructor'}, status=404)
     
 @api_view(['POST'])
+@permission_classes([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.COMPLETE)])
 def create_booking(request):
     user = request.user
     if hasattr(user, 'learner'):
