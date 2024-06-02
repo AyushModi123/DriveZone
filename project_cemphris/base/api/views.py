@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
-from base.permissions import RequiredProfileCompletionPermission
+from base.permissions import RequiredProfileCompletionPermission, IsInstructorPermission
 from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, send_activation_mail
-from .serializers import UserSerializer
+from .serializers import UserSerializer, InstructorDetailsSerializer, LicenseInformationSerializer, LearnerDetailsSerializer
 from base.models import Instructor, Learner, ProfileCompletionLevelChoices
 
 User = get_user_model()
@@ -72,6 +72,43 @@ def upload_image(request):
     else:
         return Response({'error': 'Invalid Image File'}, status=400)
 
+@api_view(['PUT'])
+def update_details(request):
+    current_user = request.user
+    if request.user.is_learner:
+        serializer = LearnerDetailsSerializer(instance=request.user.learner, data=request.data)
+    elif request.user.is_instructor:
+        serializer = InstructorDetailsSerializer(instance=request.user.instructor, data=request.data)
+    else:
+        return Response({"message": "Invalid User"}, status=400)
+    if serializer.is_valid():
+        _ = serializer.save(user=current_user)
+        current_user.save()
+        return Response({"message": "Details Updated Successfully"}, status=200)
+    return Response(serializer.errors, status=400)
+
+@api_view(['PUT'])
+def update_license(request):
+    current_user = request.user
+    license = None
+    if request.user.check_license:
+        license = request.user.license
+    serializer = LicenseInformationSerializer(instance=license, data=request.data)
+    if serializer.is_valid():
+        image_file = request.FILES.get('image', None)
+        img_url =''
+        if image_file:
+            img_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
+        _ = serializer.save(
+            user=request.user,
+            image_url=img_url
+        )        
+        current_user.save()
+        return Response({"message": "Details Updated Successfully"}, status=200)
+    return Response(serializer.errors, status=400)
+
 @api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
 def check_api(request):
     return Response("Working")
