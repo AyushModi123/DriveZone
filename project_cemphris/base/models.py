@@ -10,7 +10,6 @@ class User(AbstractUser):
     location = models.CharField(max_length=2000, null=True, blank=True)
     image_url = models.URLField(null=False, blank=True, default='')
     profile_completion_level = models.IntegerField(choices=ProfileCompletionLevelChoices.choices, null=False, blank=False, default=1)
-    dob = models.DateField(null=True, blank=False, default=timezone.now)
     mobile_number = models.CharField(max_length=20, null=True, blank=False, default="0000000000")
     preferred_language = models.CharField(null=True, blank=False, default='English')
 
