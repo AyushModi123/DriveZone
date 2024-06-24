@@ -11,7 +11,7 @@ class User(AbstractUser):
     profile_completion_level = models.IntegerField(choices=ProfileCompletionLevelChoices.choices, null=False, blank=False, default=1)
     email = models.EmailField(unique=True, null=True)
     role = models.CharField(max_length=50, choices=RoleChoices.choices, default=RoleChoices.LEARNER)
-
+    # TODO: set role as editable false later
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 

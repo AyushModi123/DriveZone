@@ -6,6 +6,7 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('activate/<uidb64>/<token>/', views.activate_account, name='activate_account'),
     path('upload-image/', views.upload_image, name='upload_profile_image'),
+    path('details/', views.get_user_details, name='get_user_details'),
     # path('update-details/', views.update_details, name='update_user_details'),
     # path('update-license/', views.update_license, name='update_license_details'),
 ]

@@ -198,3 +198,15 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 #     'razorpay': ('django_payments_razorpay.RazorPayProvider', {
 #         'public_key': 'RAZORPAY_PUBLIC_KEY',
 #         'secret_key': 'RAZORPAY_SECRET_KEY'})}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
+        }
+    },
+    'USE_SESSION_AUTH': False,  # Disable session authentication if you only want to use token authentication
+}

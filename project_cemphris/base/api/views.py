@@ -7,7 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from base.permissions import RequiredProfileCompletionPermission, IsInstructorPermission
 from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, send_activation_mail
-from .serializers import LearnerSerializer, SchoolSerializer, InstructorDetailsSerializer, LicenseInformationSerializer, LearnerDetailsSerializer
+from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer, OutInstructorSerializer, LicenseInformationSerializer
 from base.models import Instructor, Learner, ProfileCompletionLevelChoices
 
 User = get_user_model()
@@ -87,8 +87,14 @@ def upload_image(request):
 @api_view(['GET'])
 def get_user_details(request):
     current_user = request.user
-
-
+    if current_user.is_learner:
+        return Response(OutLearnerSerializer(current_user.learner).data, status=200)
+    elif current_user.is_school:
+        return Response(OutSchoolSerializer(current_user.school).data, status=200)
+    elif current_user.is_instructor:
+        return Response(OutInstructorSerializer(current_user.instructor).data, status=200)
+    else:
+        Response({'message': 'Invalid user type'}, status=400)
 # @api_view(['PUT'])
 # def update_details(request):
 #     current_user = request.user
