@@ -1,31 +1,48 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from base.choices import RoleChoices
 from base.models import Instructor, LicenseInformation, Learner, School
 
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True, required=True)
+
     class Meta:
         model = User
-        fields = ['email']
+        fields = ['email', 'password', 'password2', 'role']
+    
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+        
+        return attrs
+
+    def create(self, validated_data):
+        is_active = validated_data.pop('is_active', False)        
+        user = User.objects.create(            
+            email=validated_data['email'],
+            role=validated_data['role'],
+            is_active=is_active,            
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 class OutUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email', 'role', 'profile_completion_level')
+        fields = ('email', 'role', 'profile_completion_level', 'is_active')
 
-class LearnerSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
+class LearnerSerializer(serializers.ModelSerializer):    
     class Meta:
         model = Learner
-        fields = ['user', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language']
+        fields = ['full_name', 'location', 'mobile_number', 'preferred_language']
 
     def create(self, validated_data):
-        is_active = validated_data.pop('is_active')
-        user_data = validated_data.pop('user')
-        user = User.objects.create(role=RoleChoices.LEARNER, is_active=is_active, **user_data)
+        user = validated_data.pop('user')
         learner = Learner.objects.create(user=user, **validated_data)
         return learner
 
@@ -36,17 +53,14 @@ class OutLearnerSerializer(serializers.ModelSerializer):
         model = Learner
         fields = ('user', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language')
 
-class SchoolSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+class SchoolSerializer(serializers.ModelSerializer):    
 
     class Meta:
         model = School
-        fields = ['user', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language']
+        fields = ['name', 'location', 'mobile_number', 'preferred_language']
     
-    def create(self, validated_data):
-        is_active = validated_data.pop('is_active')
-        user_data = validated_data.pop('user')
-        user = User.objects.create(role=RoleChoices.SCHOOL, is_active=is_active, **user_data)
+    def create(self, validated_data):        
+        user = validated_data.pop('user')
         school = School.objects.create(user=user, **validated_data)
         return school
 

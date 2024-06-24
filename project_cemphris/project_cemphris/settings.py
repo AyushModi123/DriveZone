@@ -208,5 +208,5 @@ SWAGGER_SETTINGS = {
             'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
         }
     },
-    'USE_SESSION_AUTH': False,  # Disable session authentication if you only want to use token authentication
+    'USE_SESSION_AUTH': True,
 }

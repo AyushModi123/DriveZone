@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
@@ -7,50 +8,12 @@ from drf_yasg.utils import swagger_auto_schema
 from base.permissions import RequiredProfileCompletionPermission, IsInstructorPermission
 from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, send_activation_mail
-from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer, OutInstructorSerializer, LicenseInformationSerializer
+
+from base.choices import RoleChoices
+from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer, OutInstructorSerializer, UserSerializer, OutUserSerializer
 from base.models import Instructor, Learner, ProfileCompletionLevelChoices
 
 User = get_user_model()
-
-@swagger_auto_schema(
-    method='post',
-    request_body=LearnerSerializer,    
-)
-@api_view(['POST'])
-@authentication_classes([])
-@permission_classes([])
-def signup(request):
-    serializer = LearnerSerializer(data=request.data)
-    if serializer.is_valid():
-        learner = serializer.save(is_active=False)                            
-        image_file = request.FILES.get('image', None)
-        if image_file:
-            img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
-            learner.image_url = img_url
-            learner.save()
-        send_activation_mail(request, learner.user)
-        return Response({
-            'user': LearnerSerializer(learner, context={'request': request}).data,
-            'message': 'User created successfully. Please activate your account by clicking on the link we sent to your email.'
-        }, status=201)
-    return Response(serializer.errors, status=400)
-
-@api_view(['POST'])
-def create_school(request):
-    serializer = SchoolSerializer(data=request.data)
-    if serializer.is_valid():
-        school = serializer.save(is_active=False)                        
-        image_file = request.FILES.get('image', None)
-        if image_file:
-            img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
-            school.image_url = img_url
-            school.save()
-        send_activation_mail(request, school.user)
-        return Response({
-            'user': SchoolSerializer(school, context={'request': request}).data,
-            'message': 'School created successfully. Please activate your account by clicking on the link we sent to your email.'
-        }, status=201)
-    return Response(serializer.errors, status=400)
 
 @api_view(['GET'])
 @authentication_classes([])
@@ -71,18 +34,87 @@ def activate_account(request, uidb64, token):
                 return Response("Account Activated Successfully", status=200)
     return Response("Invalid Activation", status=400)
 
+
+@swagger_auto_schema(
+    method='post',
+    request_body=UserSerializer,    
+)
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def signup(request):
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save(is_active=False)        
+        send_activation_mail(request, user)
+        return Response({
+            'user': OutUserSerializer(user, context={'request': request}).data,
+            'message': 'User created successfully. Please activate your account by clicking on the link we sent to your email.'
+        }, status=201)
+    return Response(serializer.errors, status=400)
+
+@swagger_auto_schema(
+    method='post',
+    request_body=SchoolSerializer,    
+)
+@api_view(['POST'])
+def create_school(request):
+    current_user = request.user
+    if current_user.role == RoleChoices.SCHOOL:
+        serializer = SchoolSerializer(data=request.data)
+        if serializer.is_valid():
+            school = serializer.save(user=current_user)
+            image_file = request.FILES.get('image', None)
+            if image_file:
+                img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+                school.image_url = img_url
+                school.save()
+            return Response({
+                'user': SchoolSerializer(school, context={'request': request}).data,
+                'message': 'School created successfully.'
+            }, status=201)
+        return Response(serializer.errors, status=400)
+    else:
+        return Response({"error": "Role Mismatch"}, status=400)
+
+@swagger_auto_schema(
+    method='post',
+    request_body=SchoolSerializer,    
+)
+@api_view(['POST'])
+def create_learner(request):
+    current_user = request.user
+    if current_user.role == RoleChoices.LEARNER:
+        serializer = LearnerSerializer(data=request.data)
+        if serializer.is_valid():
+            school = serializer.save(user=request.user)                        
+            image_file = request.FILES.get('image', None)
+            if image_file:
+                img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+                school.image_url = img_url
+                school.save()
+            return Response({
+                'user': LearnerSerializer(school, context={'request': request}).data,
+                'message': 'Learner created successfully.'
+            }, status=201)
+        return Response(serializer.errors, status=400)
+    else:
+        return Response({"error": "Role Mismatch"}, status=400)
+
 @api_view(['POST'])
 @permission_classes([RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.BASIC)])
 def upload_image(request):
     current_user = request.user
     image_file = request.FILES.get('image', None)    
+    current_user_role_model = current_user.get_role_model
     if image_file:
         img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
-        current_user.image_url = img_url
-        current_user.save()
+        current_user_role_model.image_url = img_url
+        current_user_role_model.save()
         return Response({'message': 'Image Uploaded', 'user_id': current_user.id}, status=200)
     else:
         return Response({'error': 'Invalid Image File'}, status=400)
+    
 
 @api_view(['GET'])
 def get_user_details(request):
@@ -94,7 +126,9 @@ def get_user_details(request):
     elif current_user.is_instructor:
         return Response(OutInstructorSerializer(current_user.instructor).data, status=200)
     else:
-        Response({'message': 'Invalid user type'}, status=400)
+        return Response({'role': current_user.role}, status=200)
+
+
 # @api_view(['PUT'])
 # def update_details(request):
 #     current_user = request.user

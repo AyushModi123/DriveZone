@@ -9,29 +9,32 @@ from .choices import ProfileCompletionLevelChoices, LicenseIssuingAuthorityChoic
 class User(AbstractUser):    
     username = models.CharField(null=False, blank=True, unique=False, default="")
     profile_completion_level = models.IntegerField(choices=ProfileCompletionLevelChoices.choices, null=False, blank=False, default=1)
-    email = models.EmailField(unique=True, null=True)
-    role = models.CharField(max_length=50, choices=RoleChoices.choices, default=RoleChoices.LEARNER)
+    email = models.EmailField(unique=True, null=False, blank=False)
+    role = models.CharField(max_length=50, choices=RoleChoices.choices, null=False, blank=False)
     # TODO: set role as editable false later
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
     @property
     def is_learner(self):
-        if self.role == RoleChoices.LEARNER:
-            return True
-        return False
+        try:
+            return bool(self.learner)
+        except ObjectDoesNotExist:
+            return False
     
     @property
     def is_school(self):
-        if self.role == RoleChoices.SCHOOL:
-            return True
-        return False
+        try:
+            return bool(self.school)
+        except ObjectDoesNotExist:
+            return False
     
     @property
     def is_instructor(self):
-        if self.role == RoleChoices.INSTRUCTOR:
-            return True
-        return False
+        try:
+            return bool(self.instructor)
+        except ObjectDoesNotExist:
+            return False
     
     @property
     def check_license(self):
@@ -40,27 +43,61 @@ class User(AbstractUser):
         except ObjectDoesNotExist:
             return False
         
-
+    @property
+    def get_role_model(self):
+        if self.is_learner:
+            return self.learner
+        elif self.is_instructor:
+            return self.instructor
+        elif self.is_school:
+            return self.school
+        else:
+            return None        
 
 class Learner(models.Model):
-    user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='learner')    
-    full_name = models.CharField(max_length=255, blank=False, null=False, default="XYZ")    
-    location = models.CharField(max_length=2000, null=True, blank=True)
+    user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='learner', null=False, blank=False)
+    full_name = models.CharField(max_length=255, blank=False, null=False)    
+    location = models.CharField(max_length=2000, null=True, blank=False)
     image_url = models.URLField(null=False, blank=True, default='')    
-    mobile_number = models.CharField(max_length=20, null=True, blank=False, default="0000000000")
+    mobile_number = models.CharField(max_length=20, null=True, blank=False)
     preferred_language = models.CharField(null=True, blank=False, default='English')
 
     def __str__(self):
         return self.full_name
 
+    @property
+    def get_profile_fields(self):
+        """Returns fields that 
+        contribute to profile completion level in format
+        {'location': [fields]}
+        full_name, location, image_url, mobile_number, preferred_language, license
+        """
+
+        return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language"], 
+                "user": ["license"]
+                }
+    @property
+    def get_completion_level(self):
+        """This property directly depends on get_profile_fields property"""
+        temp = self.get_profile_fields
+        empty_fields = 0
+        for field in temp["current"]:
+            value = getattr(self, field)
+            if value in [None, '', [], {}]:
+                empty_fields += 1
+        for field in temp["user"]:
+            if not hasattr(self.user, field):
+                empty_fields+=1
+        return empty_fields
+        
 
 class Instructor(models.Model):
-    user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='instructor')    
-    school = models.ForeignKey('School', on_delete=models.CASCADE, null=True, blank=False, related_name='instructors')
-    full_name = models.CharField(max_length=255, blank=False, null=False, default="XYZ")
-    location = models.CharField(max_length=2000, null=True, blank=True)
+    user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='instructor', null=False, blank=False)
+    school = models.ForeignKey('School', on_delete=models.CASCADE, null=False, blank=False, related_name='instructors')
+    full_name = models.CharField(max_length=255, blank=False, null=False)
+    location = models.CharField(max_length=2000, null=True, blank=False)
     image_url = models.URLField(null=False, blank=True, default='')    
-    mobile_number = models.CharField(max_length=20, null=True, blank=False, default="0000000000")
+    mobile_number = models.CharField(max_length=20, null=True, blank=False)
     preferred_language = models.CharField(null=True, blank=False, default='English')
     experience = models.IntegerField(null=True, blank=False, default=0)
     area_of_expertise = models.IntegerField(choices=VehicleChoices.choices, null=True, blank=False)
@@ -68,16 +105,64 @@ class Instructor(models.Model):
     def __str__(self):
         return self.full_name
     
+    @property
+    def get_profile_fields(self):
+        """Returns fields that 
+        contribute to profile completion level in format
+        {'location': [fields]}
+        full_name, location, image_url, mobile_number, preferred_language, license, experience, area_of_expertise
+        """
+
+        return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language", "experience", "area_of_expertise"], 
+                "user": ["license"]
+                }
+    @property
+    def get_completion_level(self):
+        """This property directly depends on get_profile_fields property"""
+        temp = self.get_profile_fields
+        empty_fields = 0
+        for field in temp["current"]:
+            value = getattr(self, field)
+            if value in [None, '', [], {}]:
+                empty_fields += 1
+        for field in temp["user"]:
+            if not hasattr(self.user, field):
+                empty_fields+=1
+        return empty_fields
+    
+    
 class School(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='school')
     name = models.CharField(max_length=500, blank=False, null=False)    
     location = models.CharField(max_length=2000, null=True, blank=True)
     image_url = models.URLField(null=False, blank=True, default='')
-    mobile_number = models.CharField(max_length=20, null=True, blank=False, default="0000000000")
+    mobile_number = models.CharField(max_length=20, null=True, blank=False)
     preferred_language = models.CharField(null=True, blank=False, default='English')    
 
     def __str__(self):
         return self.name
+
+    @property
+    def get_profile_fields(self):
+        """Returns fields that 
+        contribute to profile completion level in format
+        {'location': [fields]}
+        name, location, image_url, mobile_number, preferred_language
+        """
+
+        return {"current": 
+                ["name", "location", "image_url", "mobile_number", "preferred_language"],                 
+                }
+    @property
+    def get_completion_level(self):
+        """This property directly depends on get_profile_fields property"""
+        temp = self.get_profile_fields
+        empty_fields = 0
+        for field in temp["current"]:
+            value = getattr(self, field)
+            if value in [None, '', [], {}]:
+                empty_fields += 1        
+        return empty_fields
 
 class LicenseInformation(models.Model):    
     
