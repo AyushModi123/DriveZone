@@ -9,4 +9,4 @@ class Payment(models.Model):
     learner = models.ForeignKey('base.Learner', on_delete=models.CASCADE, related_name='payment')
     payment_method = models.IntegerField(choices=PaymentMethod)
     created_on = models.DateTimeField(auto_created=True, auto_now=True)
-    amount = models.IntegerField(null=False, blank=True)
+    amount = models.IntegerField(null=False, blank=True, default=0)

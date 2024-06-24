@@ -26,3 +26,8 @@ class LicenseIssuingAuthorityChoices(models.IntegerChoices):
     REGIONAL_TRANSPORT_OFFICE = 2 #"Regional Transport Office (RTO)"
     UT_TRANSPORT_DEPARTMENT = 3 #"Union Territory Transport Department"
     MINISTRY_OF_ROAD_TRANSPORT_AND_HIGHWAYS = 4 #"Ministry of Road Transport and Highways (MoRTH)"
+
+class RoleChoices(models.TextChoices):
+    LEARNER = 'learner', 'Learner'
+    INSTRUCTOR = 'instructor', 'Instructor'
+    SCHOOL = 'school', 'School'

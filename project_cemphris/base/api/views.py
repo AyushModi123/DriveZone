@@ -7,43 +7,50 @@ from drf_yasg.utils import swagger_auto_schema
 from base.permissions import RequiredProfileCompletionPermission, IsInstructorPermission
 from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, send_activation_mail
-from .serializers import UserSerializer, InstructorDetailsSerializer, LicenseInformationSerializer, LearnerDetailsSerializer
+from .serializers import LearnerSerializer, SchoolSerializer, InstructorDetailsSerializer, LicenseInformationSerializer, LearnerDetailsSerializer
 from base.models import Instructor, Learner, ProfileCompletionLevelChoices
 
 User = get_user_model()
 
 @swagger_auto_schema(
     method='post',
-    request_body=UserSerializer,    
+    request_body=LearnerSerializer,    
 )
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([])
 def signup(request):
-    serializer = UserSerializer(data=request.data)
+    serializer = LearnerSerializer(data=request.data)
     if serializer.is_valid():
-        user = serializer.save(is_active=False)
-        user_type = request.data.get('user_type', None)
-        if user_type == 'instructor':
-            instructor = Instructor.objects.create(user=user)
-            instructor.save()
-        elif user_type == 'learner':
-            learner = Learner.objects.create(user=user)
-            learner.save()
-        else:
-            return Response({'msg': 'Invalid user type'}, status=400)
+        learner = serializer.save(is_active=False)                            
         image_file = request.FILES.get('image', None)
         if image_file:
             img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
-            user.image_url = img_url
-            user.save()
-        send_activation_mail(request, user)
+            learner.image_url = img_url
+            learner.save()
+        send_activation_mail(request, learner.user)
         return Response({
-            'user': UserSerializer(user, context={'request': request}).data,
+            'user': LearnerSerializer(learner, context={'request': request}).data,
             'message': 'User created successfully. Please activate your account by clicking on the link we sent to your email.'
         }, status=201)
     return Response(serializer.errors, status=400)
 
+@api_view(['POST'])
+def create_school(request):
+    serializer = SchoolSerializer(data=request.data)
+    if serializer.is_valid():
+        school = serializer.save(is_active=False)                        
+        image_file = request.FILES.get('image', None)
+        if image_file:
+            img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+            school.image_url = img_url
+            school.save()
+        send_activation_mail(request, school.user)
+        return Response({
+            'user': SchoolSerializer(school, context={'request': request}).data,
+            'message': 'School created successfully. Please activate your account by clicking on the link we sent to your email.'
+        }, status=201)
+    return Response(serializer.errors, status=400)
 
 @api_view(['GET'])
 @authentication_classes([])
@@ -77,44 +84,49 @@ def upload_image(request):
     else:
         return Response({'error': 'Invalid Image File'}, status=400)
 
-@api_view(['PUT'])
-def update_details(request):
+@api_view(['GET'])
+def get_user_details(request):
     current_user = request.user
-    if request.user.is_learner:
-        serializer = LearnerDetailsSerializer(instance=request.user.learner, data=request.data)
-    elif request.user.is_instructor:
-        serializer = InstructorDetailsSerializer(instance=request.user.instructor, data=request.data)
-    else:
-        return Response({"message": "Invalid User"}, status=400)
-    if serializer.is_valid():
-        _ = serializer.save(user=current_user)
-        current_user.save()
-        return Response({"message": "Details Updated Successfully"}, status=200)
-    return Response(serializer.errors, status=400)
 
-@swagger_auto_schema(
-    method='put',
-    request_body=LicenseInformationSerializer,    
-)
-@api_view(['PUT'])
-def update_license(request):
-    current_user = request.user
-    license = None
-    if request.user.check_license:
-        license = request.user.license
-    serializer = LicenseInformationSerializer(instance=license, data=request.data)
-    if serializer.is_valid():
-        image_file = request.FILES.get('image', None)
-        img_url =''
-        if image_file:
-            img_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
-        _ = serializer.save(
-            user=request.user,
-            image_url=img_url
-        )        
-        current_user.save()
-        return Response({"message": "Details Updated Successfully"}, status=200)
-    return Response(serializer.errors, status=400)
+
+# @api_view(['PUT'])
+# def update_details(request):
+#     current_user = request.user
+#     if request.user.is_learner:
+#         serializer = LearnerDetailsSerializer(instance=request.user.learner, data=request.data)
+#     elif request.user.is_instructor:
+#         serializer = InstructorDetailsSerializer(instance=request.user.instructor, data=request.data)
+#     else:
+#         return Response({"message": "Invalid User"}, status=400)
+#     if serializer.is_valid():
+#         _ = serializer.save(user=current_user)
+#         current_user.save()
+#         return Response({"message": "Details Updated Successfully"}, status=200)
+#     return Response(serializer.errors, status=400)
+
+# @swagger_auto_schema(
+#     method='put',
+#     request_body=LicenseInformationSerializer,    
+# )
+# @api_view(['PUT'])
+# def update_license(request):
+#     current_user = request.user
+#     license = None
+#     if request.user.check_license:
+#         license = request.user.license
+#     serializer = LicenseInformationSerializer(instance=license, data=request.data)
+#     if serializer.is_valid():
+#         image_file = request.FILES.get('image', None)
+#         img_url =''
+#         if image_file:
+#             img_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
+#         _ = serializer.save(
+#             user=request.user,
+#             image_url=img_url
+#         )        
+#         current_user.save()
+#         return Response({"message": "Details Updated Successfully"}, status=200)
+#     return Response(serializer.errors, status=400)
 
 @api_view(['GET'])
 @authentication_classes([])
