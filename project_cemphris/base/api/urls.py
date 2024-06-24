@@ -9,6 +9,7 @@ urlpatterns = [
     path('details/', views.get_user_details, name='get_user_details'),
     path('create-school/', views.create_school, name='create-school'),
     path('create-learner/', views.create_learner, name='create-learner'),
+    path('upload-license/', views.upload_license, name='upload-license'),
     # path('update-details/', views.update_details, name='update_user_details'),
     # path('update-license/', views.update_license, name='update_license_details'),
 ]

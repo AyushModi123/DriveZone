@@ -10,7 +10,8 @@ from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, send_activation_mail
 
 from base.choices import RoleChoices
-from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer, OutInstructorSerializer, UserSerializer, OutUserSerializer
+from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer,\
+      OutInstructorSerializer, UserSerializer, OutUserSerializer, LicenseInformationSerializer
 from base.models import Instructor, Learner, ProfileCompletionLevelChoices
 
 User = get_user_model()
@@ -111,7 +112,7 @@ def upload_image(request):
         img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
         current_user_role_model.image_url = img_url
         current_user_role_model.save()
-        return Response({'message': 'Image Uploaded', 'user_id': current_user.id}, status=200)
+        return Response({'message': 'Image Uploaded', 'user_id': current_user.id}, status=201)
     else:
         return Response({'error': 'Invalid Image File'}, status=400)
     
@@ -128,6 +129,24 @@ def get_user_details(request):
     else:
         return Response({'role': current_user.role}, status=200)
 
+@swagger_auto_schema(
+    method='post',
+    request_body=LicenseInformationSerializer,    
+)
+@api_view(['POST'])
+def upload_license(request):
+    current_user = request.user
+    image_file = request.FILES.get('image', None)
+    serializer = LicenseInformationSerializer(data=request.data)    
+    if image_file:
+        if serializer.is_valid():
+            img_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
+            serializer.save(image_url=img_url, user=current_user)
+            return Response({'message': 'License uploaded successfully'}, status=201)
+        else:
+            return Response(serializer.errors, status=400)
+    else:
+        return Response({'error': 'Invalid Image File'}, status=400)
 
 # @api_view(['PUT'])
 # def update_details(request):

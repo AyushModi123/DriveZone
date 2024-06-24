@@ -174,4 +174,7 @@ class LicenseInformation(models.Model):
     expiration_date = models.DateField(null=False, blank=False)
     issuing_authority = models.IntegerField(choices=LicenseIssuingAuthorityChoices.choices, blank=False, null=False)
 
+    def __str__(self):
+        return self.number
+
 #plans

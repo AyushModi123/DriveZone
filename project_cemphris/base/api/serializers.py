@@ -92,7 +92,18 @@ class OutInstructorSerializer(serializers.ModelSerializer):
     def get_area_of_expertise(self, obj):
         return obj.get_area_of_expertise_display()
 
-class LicenseInformationSerializer(serializers.ModelSerializer):
+class LicenseInformationSerializer(serializers.ModelSerializer):    
     class Meta:
         model = LicenseInformation
         fields = ('number', 'type', 'expiration_date', 'issuing_authority')
+    
+    def create(self, validated_data):
+        image_url = validated_data.pop('image_url')
+        user = validated_data.pop('user')
+        license = LicenseInformation.objects.create(user=user, image_url=image_url, **validated_data)
+        return license
+
+    def update(self, validated_data):
+        image_url = validated_data.pop('image_url')
+        license = LicenseInformation.objects.update(image_url=image_url, **validated_data)
+        return license
