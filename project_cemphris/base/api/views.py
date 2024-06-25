@@ -103,7 +103,6 @@ def create_learner(request):
         return Response({"error": "Role Mismatch"}, status=400)
 
 @api_view(['POST'])
-@permission_classes([RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.BASIC)])
 def upload_image(request):
     current_user = request.user
     image_file = request.FILES.get('image', None)    

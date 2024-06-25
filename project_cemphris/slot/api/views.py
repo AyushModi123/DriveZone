@@ -11,7 +11,7 @@ from .serializers import SlotSerializer, SemiSlotSerializer
     request_body=SlotSerializer,    
 )
 @api_view(['POST'])
-@permission_classes([IsInstructorPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.COMPLETE)])
+@permission_classes([IsInstructorPermission, RequiredProfileCompletionPermission(required_level=100)])
 def create_slot(request):
     serializer = SlotSerializer(data=request.data)
     if serializer.is_valid():

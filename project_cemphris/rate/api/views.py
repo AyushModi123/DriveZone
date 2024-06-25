@@ -6,7 +6,7 @@ from rate.models import Rating
 
 
 @api_view(['POST'])
-@permission_classes([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.BASIC)])
+@permission_classes([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=100)])
 def rate_instructor(request):
     rating = request.POST.get('rating', None)
     instructor_username = request.POST.get('username', None)

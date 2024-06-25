@@ -28,7 +28,7 @@ def get_bookings(request):
     request_body=BookingSerializer,    
 )
 @api_view(['POST'])
-@permission_classes([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.COMPLETE)])
+@permission_classes([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=100)])
 def create_booking(request):
     user = request.user
     if hasattr(user, 'learner'):

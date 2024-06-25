@@ -2,13 +2,14 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from django.core.validators import MaxValueValidator
 from vehicle.models import VehicleChoices
 from .choices import ProfileCompletionLevelChoices, LicenseIssuingAuthorityChoices, LicenseTypeChoices, RoleChoices
 
 
 class User(AbstractUser):    
     username = models.CharField(null=False, blank=True, unique=False, default="")
-    profile_completion_level = models.IntegerField(choices=ProfileCompletionLevelChoices.choices, null=False, blank=False, default=1)
+    profile_completion_level = models.PositiveSmallIntegerField(validators=[MaxValueValidator(100)], null=False, blank=False, default=10)
     email = models.EmailField(unique=True, null=False, blank=False)
     role = models.CharField(max_length=50, choices=RoleChoices.choices, null=False, blank=False)
     # TODO: set role as editable false later
@@ -75,11 +76,11 @@ class Learner(models.Model):
 
         return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language"], 
                 "user": ["license"]
-                }
+                }, 6
     @property
     def get_completion_level(self):
         """This property directly depends on get_profile_fields property"""
-        temp = self.get_profile_fields
+        temp, total_fields = self.get_profile_fields
         empty_fields = 0
         for field in temp["current"]:
             value = getattr(self, field)
@@ -88,7 +89,7 @@ class Learner(models.Model):
         for field in temp["user"]:
             if not hasattr(self.user, field):
                 empty_fields+=1
-        return empty_fields
+        return (empty_fields//total_fields)*100
         
 
 class Instructor(models.Model):
@@ -115,11 +116,11 @@ class Instructor(models.Model):
 
         return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language", "experience", "area_of_expertise"], 
                 "user": ["license"]
-                }
+                }, 8
     @property
     def get_completion_level(self):
         """This property directly depends on get_profile_fields property"""
-        temp = self.get_profile_fields
+        temp, total_fields = self.get_profile_fields
         empty_fields = 0
         for field in temp["current"]:
             value = getattr(self, field)
@@ -128,7 +129,7 @@ class Instructor(models.Model):
         for field in temp["user"]:
             if not hasattr(self.user, field):
                 empty_fields+=1
-        return empty_fields
+        return (empty_fields//total_fields)*100
     
     
 class School(models.Model):
@@ -152,17 +153,17 @@ class School(models.Model):
 
         return {"current": 
                 ["name", "location", "image_url", "mobile_number", "preferred_language"],                 
-                }
+                }, 5
     @property
     def get_completion_level(self):
         """This property directly depends on get_profile_fields property"""
-        temp = self.get_profile_fields
+        temp, total_fields = self.get_profile_fields
         empty_fields = 0
         for field in temp["current"]:
             value = getattr(self, field)
             if value in [None, '', [], {}]:
                 empty_fields += 1        
-        return empty_fields
+        return (empty_fields//total_fields)*100
 
 class LicenseInformation(models.Model):    
     

@@ -4,6 +4,13 @@ from typing import Union
 from .models import LicenseInformation, Instructor, Learner, School
 from .choices import ProfileCompletionLevelChoices
 
+
+@receiver(pre_save, sender=Union[Instructor, Learner, School])
+def update_profile_completion_level(sender, instance, created, **kwargs):
+    if not created:
+        instance.user.profile_completion_level = instance.get_completion_level
+        instance.save()
+
 # @receiver(post_save, sender=LicenseInformation)
 # def update_license_profile_completion_level(sender, instance, created, **kwargs):
 #     if created:

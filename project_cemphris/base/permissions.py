@@ -41,5 +41,5 @@ class RequiredProfileCompletionPermission(IsAuthenticated, IsActivePermission):
     def has_permission(self, request, view):
         if super().has_permission(request, view):
             user_completion_level = request.user.profile_completion_level
-            return user_completion_level >= self.required_level.value
+            return user_completion_level >= self.required_level
         return False

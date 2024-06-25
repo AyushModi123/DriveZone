@@ -13,7 +13,7 @@ from firebase_utils import FirebaseUploadImage
     request_body=InstructorVehicleSerializer,    
 )
 @api_view(['POST'])
-@permission_classes([IsInstructorPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.BASIC)])
+@permission_classes([IsInstructorPermission, RequiredProfileCompletionPermission(required_level=50)])
 def create_vehicle(request):
     serializer = InstructorVehicleSerializer(data=request.data)
     if serializer.is_valid():
@@ -58,7 +58,7 @@ def get_vehicle(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsInstructorPermission, RequiredProfileCompletionPermission(required_level=ProfileCompletionLevelChoices.BASIC)])
+@permission_classes([IsInstructorPermission, RequiredProfileCompletionPermission(required_level=50)])
 def upload_image(request):
     image_file = request.FILES.get('image', None)
     vehicle_id = request.GET.get('vehicle_id', None) #Query Params
