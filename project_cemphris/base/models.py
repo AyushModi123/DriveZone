@@ -152,7 +152,8 @@ class School(models.Model):
         """
 
         return {"current": 
-                ["name", "location", "image_url", "mobile_number", "preferred_language"],                 
+                ["name", "location", "image_url", "mobile_number", "preferred_language"],  
+                "vehicle": ["vehicles"]               
                 }, 5
     @property
     def get_completion_level(self):
@@ -162,7 +163,10 @@ class School(models.Model):
         for field in temp["current"]:
             value = getattr(self, field)
             if value in [None, '', [], {}]:
-                empty_fields += 1        
+                empty_fields += 1
+        for field in temp["vehicle"]:
+            if not hasattr(self, field):
+                empty_fields+=1
         return (empty_fields//total_fields)*100
 
 class LicenseInformation(models.Model):    

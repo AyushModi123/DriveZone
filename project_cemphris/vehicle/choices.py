@@ -1,10 +1,10 @@
 from django.db import models
 
-class VehicleChoices(models.IntegerChoices):
-    MOTORBIKE= 1 
-    CAR = 2
-    TRUCK = 3
+class VehicleChoices(models.TextChoices):
+    MOTORBIKE= 'motorbike', 'Motorbike'
+    CAR = 'car', 'Car'
+    TRUCK = 'truck', 'Truck'
 
-class VehicleTypeChoices(models.IntegerChoices):
-    MANUAL = 1
-    AUTOMATIC = 2
+class VehicleTypeChoices(models.TextChoices):
+    MANUAL = 'manual', 'Manual'
+    AUTOMATIC = 'automatic', 'Automatic'

@@ -7,15 +7,24 @@ class IsActivePermission(BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_active)
     
-class IsInstructorPermission(IsAuthenticated, IsActivePermission):
+# class IsInstructorPermission(IsAuthenticated, IsActivePermission):
+#     """
+#     Allows access only to  authenticated, active instructors.
+#     """
+#     def has_permission(self, request, view):
+#         if super().has_permission(request, view):
+#             return request.user.is_instructor
+#         return False
+    
+class IsSchoolPermission(IsAuthenticated, IsActivePermission):
     """
-    Allows access only to  authenticated, active instructors.
+    Allows access only to  authenticated, active schools.
     """
     def has_permission(self, request, view):
         if super().has_permission(request, view):
-            return request.user.is_instructor
+            return request.user.is_school
         return False
-    
+
 class IsLearnerPermission(IsAuthenticated, IsActivePermission):
     """
     Allows access only to  authenticated, active learner.

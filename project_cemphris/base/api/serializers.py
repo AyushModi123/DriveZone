@@ -90,6 +90,7 @@ class OutInstructorSerializer(serializers.ModelSerializer):
         return representation
 
     def get_area_of_expertise(self, obj):
+        """Called for area_of_expertise serializer field"""
         return obj.get_area_of_expertise_display()
 
 class LicenseInformationSerializer(serializers.ModelSerializer):    
