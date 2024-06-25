@@ -89,7 +89,8 @@ class Learner(models.Model):
         for field in temp["user"]:
             if not hasattr(self.user, field):
                 empty_fields+=1
-        return (empty_fields//total_fields)*100
+        non_empty_fields = total_fields - empty_fields
+        return (non_empty_fields//total_fields)*100
         
 
 class Instructor(models.Model):
@@ -129,7 +130,8 @@ class Instructor(models.Model):
         for field in temp["user"]:
             if not hasattr(self.user, field):
                 empty_fields+=1
-        return (empty_fields//total_fields)*100
+        non_empty_fields = total_fields - empty_fields
+        return (non_empty_fields//total_fields)*100
     
     
 class School(models.Model):
@@ -167,7 +169,8 @@ class School(models.Model):
         for field in temp["vehicle"]:
             if not hasattr(self, field):
                 empty_fields+=1
-        return (empty_fields//total_fields)*100
+        non_empty_fields = total_fields - empty_fields
+        return (non_empty_fields//total_fields)*100
 
 class LicenseInformation(models.Model):    
     

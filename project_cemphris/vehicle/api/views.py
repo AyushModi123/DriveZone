@@ -34,7 +34,7 @@ class VehicleView(APIView):
                     image_url=img_url, 
                     school=request.user.school
                 )
-                return Response({'message': 'Vehicle Saved', 'vehicle_id': vehicle.id}, status=201)
+                return Response({'message': 'Vehicle Saved', 'vehicle_id': vehicle.id, 'image_url': img_url}, status=201)
             else:
                 return Response(serializer.errors, status=400)
         else:

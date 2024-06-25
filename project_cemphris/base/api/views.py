@@ -114,7 +114,7 @@ def upload_image(request):
         img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
         current_user_role_model.image_url = img_url
         current_user_role_model.save()
-        return Response({'message': 'Image Uploaded', 'user_id': current_user.id}, status=201)
+        return Response({'message': 'Image Uploaded', 'image_url': img_url}, status=201)
     else:
         return Response({'error': 'Invalid Image File'}, status=400)
     
@@ -144,7 +144,7 @@ def upload_license(request):
         if serializer.is_valid():
             img_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
             serializer.save(image_url=img_url, user=current_user)
-            return Response({'message': 'License uploaded successfully'}, status=201)
+            return Response({'message': 'License uploaded successfully', 'image_url': img_url}, status=201)
         else:
             return Response(serializer.errors, status=400)
     else:
