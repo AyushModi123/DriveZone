@@ -101,7 +101,7 @@ class Instructor(models.Model):
     mobile_number = models.CharField(max_length=20, null=True, blank=False)
     preferred_language = models.CharField(null=True, blank=False, default='English')
     experience = models.IntegerField(null=True, blank=False, default=0)
-    area_of_expertise = models.IntegerField(choices=VehicleChoices.choices, null=True, blank=False)
+    area_of_expertise = models.CharField(choices=VehicleChoices.choices, null=False, blank=False)
 
     def __str__(self):
         return self.full_name

@@ -4,14 +4,17 @@ from rest_framework.views import APIView
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
+from django.db.models import Q
+from django.utils.crypto import get_random_string
 from drf_yasg.utils import swagger_auto_schema
-from base.permissions import RequiredProfileCompletionPermission
+from base.permissions import RequiredProfileCompletionPermission, IsSchoolPermission
 from firebase_utils import FirebaseUploadImage
-from base.utils import activation_token_manager, send_activation_mail
+from base.utils import activation_token_manager, send_activation_mail, send_instructor_login_details
 
 from base.choices import RoleChoices
 from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer,\
-      OutInstructorSerializer, UserSerializer, OutUserSerializer, LicenseInformationSerializer
+      OutInstructorSerializer, UserSerializer, OutUserSerializer, LicenseInformationSerializer, \
+      OutShortInstructorSerializer, InstructorSerializer
 from base.models import Instructor, Learner, ProfileCompletionLevelChoices
 
 User = get_user_model()
@@ -66,7 +69,7 @@ def create_school(request):
         if serializer.is_valid():
             school = serializer.save(user=current_user)
             image_file = request.FILES.get('image', None)
-            if image_file:
+            if image_file is not None:
                 img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
                 school.image_url = img_url
                 school.save()
@@ -146,6 +149,44 @@ def upload_license(request):
             return Response(serializer.errors, status=400)
     else:
         return Response({'error': 'Invalid Image File'}, status=400)
+    
+@swagger_auto_schema()
+class InstructorView(APIView):
+    permission_classes = [IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)]
+
+    def get(self, request):
+        current_user = request.user
+        q = request.GET.get("q", "")
+        instructors = Instructor.objects.filter(
+            Q(school=current_user.school) &
+            (
+                Q(full_name__icontains=q) | 
+                Q(location__icontains=q) |
+                Q(experience__iexact=q) |
+                Q(preferred_language__iexact=q)
+            )
+        )
+        return Response({'vehicles': OutShortInstructorSerializer(instructors, many=True).data}, status=200)
+    @swagger_auto_schema(request_body=InstructorSerializer)
+    def post(self, request):
+        current_user = request.user
+        serializer = InstructorSerializer(data=request.data)
+        if serializer.is_valid():
+            random_password = get_random_string(length=12)
+            instructor = serializer.save(is_active=False, password=random_password, school=current_user.school)
+            image_file = request.FILES.get('image', None)
+            if image_file is not None:
+                img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+                instructor.image_url = img_url
+                instructor.save()
+            send_activation_mail(request, instructor.user)
+            send_instructor_login_details(request, instructor.user, current_user.school, random_password)
+            return Response({
+            'user': OutShortInstructorSerializer(instructor, context={'request': request}).data,
+            'message': 'Instructor created successfully. Account will be activated once the instructor clicks on the link sent to their email'
+        }, status=201)
+        return Response(serializer.errors, status=400)
+
 
 # @api_view(['PUT'])
 # def update_details(request):

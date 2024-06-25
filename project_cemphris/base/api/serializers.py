@@ -108,3 +108,36 @@ class LicenseInformationSerializer(serializers.ModelSerializer):
         image_url = validated_data.pop('image_url')
         license = LicenseInformation.objects.update(image_url=image_url, **validated_data)
         return license
+
+class OutShortInstructorSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email', read_only=True)
+
+    class Meta:
+        model = Instructor
+        fields = ('id', 'email', 'full_name', 'location', 'image_url', 'preferred_language', 'experience')
+
+class InstructorSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+    class Meta:
+        model = Instructor
+        fields = ('email', 'full_name', 'location', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise')
+
+    def create(self, validated_data):
+        is_active = validated_data.pop('is_active', False)
+        password = validated_data.pop('password', None)
+        school = validated_data.pop('school', None)
+        email = validated_data.pop('email', None)
+        user = User.objects.create(            
+            email=email,
+            role=RoleChoices.INSTRUCTOR,
+            is_active=is_active,
+        )
+        user.set_password(password)
+        user.save()
+        instructor = Instructor.objects.create(
+            user=user,
+            school=school,
+            **validated_data
+        )
+        instructor.save()
+        return instructor

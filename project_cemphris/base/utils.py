@@ -26,3 +26,19 @@ def send_activation_mail(request, user):
             mail_subject, message, to=[to_email]
         )
     email.send()
+
+def send_instructor_login_details(request, user, school, password):
+    current_site = get_current_site(request)
+    mail_subject = 'Login Credentials'
+    message = render_to_string('base/login_cred_email.html', {
+            'user': user,
+            'school': school,
+            'domain': current_site.domain,
+            'password': password            
+        })
+    to_email = user.email
+    
+    email = EmailMessage(
+            mail_subject, message, to=[to_email]
+        )
+    email.send()

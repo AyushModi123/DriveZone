@@ -1,0 +1,12 @@
+{% autoescape off %}
+Hi {{ user.instructor.full_name }},
+
+You have been registered by {{ school.name }} as an INSTRUCTOR.
+
+Below are your login credentials:
+
+Email: {{ user.email }}
+Password: {{ password }}
+
+Visit http://{{ domain }} to login.
+{% endautoescape %}
