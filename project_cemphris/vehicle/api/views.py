@@ -6,7 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from base.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission
 from base.models import User, ProfileCompletionLevelChoices
 from vehicle.models import Vehicle
-from .serializers import VehicleSerializer, OutShortVehicleSerializer, VehicleIDSerializer
+from .serializers import VehicleSerializer, OutShortVehicleSerializer
 from firebase_utils import FirebaseUploadImage
 
 
@@ -40,45 +40,43 @@ class VehicleView(APIView):
         else:
             return Response({'error': 'Invalid Image File'}, status=400)
 
-@api_view(['GET'])
-def get_vehicle(request):
-    """get vehicle by id"""
-    current_user = request.user
-    vehicle_id = request.GET.get('id', None)
-    try:
-        vehicle = Vehicle.objects.get(id=vehicle_id)
-    except Vehicle.DoesNotExist:
-        return Response({
-            'error': 'Vehicle Not Found'
-        }, status=404
-    )
-    if current_user.is_learner:                    
-            return Response({
-                'vehicle': VehicleSerializer(vehicle).data
-                }, status=200
-            )
-    elif current_user.is_school:        
-        return Response({
-            'vehicle': VehicleSerializer(vehicle).data
-            },
-            status=200
-        )
-    else:
-        return Response({
-            'error': 'Invalid user type'
-            },
-            status=400
-        )
+# @api_view(['GET'])
+# def get_vehicle(request):
+#     """get vehicle by id"""
+#     current_user = request.user
+#     vehicle_id = request.GET.get('id', None)
+#     try:
+#         vehicle = Vehicle.objects.get(id=vehicle_id)
+#     except Vehicle.DoesNotExist:
+#         return Response({
+#             'error': 'Vehicle Not Found'
+#         }, status=404
+#     )
+#     if current_user.is_learner:                    
+#             return Response({
+#                 'vehicle': 
+#                 }, status=200
+#             )
+#     elif current_user.is_school:        
+#         return Response({
+#             'vehicle': 
+#             },
+#             status=200
+#         )
+#     else:
+#         return Response({
+#             'error': 'Invalid user type'
+#             },
+#             status=400
+#         )
 
 
 @api_view(['PUT'])
 @permission_classes([IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)])
 def upload_image(request):
     image_file = request.FILES.get('image', None)
-    serializer = VehicleIDSerializer(data=request.data)
-    if image_file:
-        if serializer.is_valid():
-            vehicle_id = serializer.data.get('id')
+    vehicle_id = request.data.get('id', None)    
+    if image_file:        
             try:            
                 vehicle = Vehicle.objects.get(id=vehicle_id)
             except Vehicle.DoesNotExist:
