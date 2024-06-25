@@ -175,9 +175,9 @@ class LicenseInformation(models.Model):
     number = models.CharField(max_length=50, null=False, blank=False, primary_key=True)
     # photo
     image_url = models.URLField(null=False, blank=True, default='')
-    type = models.IntegerField(choices=LicenseTypeChoices.choices, null=False, blank=False)
+    type = models.CharField(choices=LicenseTypeChoices.choices, null=False, blank=False)
     expiration_date = models.DateField(null=False, blank=False)
-    issuing_authority = models.IntegerField(choices=LicenseIssuingAuthorityChoices.choices, blank=False, null=False)
+    issuing_authority = models.CharField(choices=LicenseIssuingAuthorityChoices.choices, blank=False, null=False)
 
     def __str__(self):
         return self.number

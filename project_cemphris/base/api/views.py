@@ -156,17 +156,26 @@ class InstructorView(APIView):
 
     def get(self, request):
         current_user = request.user
-        q = request.GET.get("q", "")
-        instructors = Instructor.objects.filter(
-            Q(school=current_user.school) &
-            (
-                Q(full_name__icontains=q) | 
-                Q(location__icontains=q) |
-                Q(experience__iexact=q) |
-                Q(preferred_language__iexact=q)
+        instructor_id = request.GET.get("id", None)
+        if instructor_id is not None:
+            try:
+                instructor = Instructor.objects.get(id=instructor_id, school=current_user.school)
+            except Instructor.DoesNotExist:
+                return Response({'error': 'Invalid Instructor ID'}, status=400)
+            return Response({'instructor': OutInstructorSerializer(instructor, many=False).data}, status=200)
+        else:
+            q = request.GET.get("q", "")
+            instructors = Instructor.objects.filter(
+                Q(school=current_user.school) &
+                (
+                    Q(full_name__icontains=q) | 
+                    Q(location__icontains=q) |
+                    Q(experience__iexact=q) |
+                    Q(preferred_language__iexact=q)
+                )
             )
-        )
-        return Response({'vehicles': OutShortInstructorSerializer(instructors, many=True).data}, status=200)
+            return Response({'instructors': OutShortInstructorSerializer(instructors, many=True).data}, status=200)
+
     @swagger_auto_schema(request_body=InstructorSerializer)
     def post(self, request):
         current_user = request.user
@@ -186,6 +195,7 @@ class InstructorView(APIView):
             'message': 'Instructor created successfully. Account will be activated once the instructor clicks on the link sent to their email'
         }, status=201)
         return Response(serializer.errors, status=400)
+
 
 
 # @api_view(['PUT'])

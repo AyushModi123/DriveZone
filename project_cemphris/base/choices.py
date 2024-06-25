@@ -10,22 +10,22 @@ class ProfileCompletionLevelChoices(models.IntegerChoices):
     COMPLETE = 3
 
 
-class LicenseTypeChoices(models.IntegerChoices):
-    LEARNER = 1 #"Learner's License"
-    LMV = 2 #"Light Motor Vehicle License"
-    TRANSPORT = 3 #"Transport Vehicle License"
-    HMV = 4 #"Heavy Motor Vehicle License"
-    HAZARDOUS = 5 #"Hazardous Goods License"
-    MOTORCYCLE = 6 #"Motorcycle License"
-    TRACTOR = 7 #"Tractor License"
-    NTV = 8 #"Non-Transport Vehicle License"
-    IDP = 9 #"International Driving Permit"
+class LicenseTypeChoices(models.TextChoices):
+    LEARNER = ('learner', "Learner's License")
+    LMV = ('lmv', "Light Motor Vehicle License")
+    TRANSPORT = ('transport', "Transport Vehicle License")
+    HMV = ('hmv', "Heavy Motor Vehicle License")
+    HAZARDOUS = ('hazardous', "Hazardous Goods License")
+    MOTORCYCLE = ('motorcycle', "Motorcycle License")
+    TRACTOR = ('tractor', "Tractor License")
+    NTV = ('ntv', "Non-Transport Vehicle License")
+    IDP = ('idp', "International Driving Permit")
 
-class LicenseIssuingAuthorityChoices(models.IntegerChoices):
-    STATE_TRANSPORT_DEPARTMENT = 1 #"State Transport Department"
-    REGIONAL_TRANSPORT_OFFICE = 2 #"Regional Transport Office (RTO)"
-    UT_TRANSPORT_DEPARTMENT = 3 #"Union Territory Transport Department"
-    MINISTRY_OF_ROAD_TRANSPORT_AND_HIGHWAYS = 4 #"Ministry of Road Transport and Highways (MoRTH)"
+class LicenseIssuingAuthorityChoices(models.TextChoices):
+    STATE_TRANSPORT_DEPARTMENT = ('state_transport_department', "State Transport Department")
+    REGIONAL_TRANSPORT_OFFICE = ('regional_transport_office', "Regional Transport Office (RTO)")
+    UT_TRANSPORT_DEPARTMENT = ('ut_transport_department', "Union Territory Transport Department")
+    MINISTRY_OF_ROAD_TRANSPORT_AND_HIGHWAYS = ('morth', "Ministry of Road Transport and Highways (MoRTH)")
 
 class RoleChoices(models.TextChoices):
     LEARNER = 'learner', 'Learner'

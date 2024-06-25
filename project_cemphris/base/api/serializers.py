@@ -71,14 +71,20 @@ class OutSchoolSerializer(serializers.ModelSerializer):
         model = School
         fields = ['user', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language']
 
+class OutLicenseInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LicenseInformation
+        fields = ('number', 'type', 'expiration_date', 'issuing_authority', 'image_url')
+
 class OutInstructorSerializer(serializers.ModelSerializer):
     user = OutUserSerializer()
     school = OutSchoolSerializer()
+    license = OutLicenseInformationSerializer(allow_null=True)
     area_of_expertise = serializers.SerializerMethodField()
 
     class Meta:
         model = Instructor
-        fields = ['user', 'school', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise']
+        fields = ['user', 'school', 'license', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
