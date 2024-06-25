@@ -6,16 +6,13 @@ from drf_yasg.utils import swagger_auto_schema
 from base.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission
 from base.models import User, ProfileCompletionLevelChoices
 from vehicle.models import Vehicle
-from .serializers import VehicleSerializer, OutShortVehicleSerializer
+from .serializers import VehicleSerializer, OutShortVehicleSerializer, VehicleIDSerializer
 from firebase_utils import FirebaseUploadImage
 
 
 
 class VehicleView(APIView):
-    def get_permissions(self):
-        if self.request.method in ('POST', 'PUT'):
-            return [IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)]
-        return [IsSchoolPermission]
+    permission_classes = [IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)]
 
     def get(self, request):
         q = request.GET.get("q", "")
@@ -45,6 +42,7 @@ class VehicleView(APIView):
 
 @api_view(['GET'])
 def get_vehicle(request):
+    """get vehicle by id"""
     current_user = request.user
     vehicle_id = request.GET.get('id', None)
     try:
@@ -73,19 +71,21 @@ def get_vehicle(request):
         )
 
 
-@api_view(['POST'])
+@api_view(['PUT'])
 @permission_classes([IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)])
 def upload_image(request):
     image_file = request.FILES.get('image', None)
-    vehicle_id = request.GET.get('vehicle_id', None) #Query Params
+    serializer = VehicleIDSerializer(data=request.data)
     if image_file:
-        try:            
-            vehicle = Vehicle.objects.get(id=vehicle_id)
-        except Vehicle.DoesNotExist:
-            return Response({'error': 'Invalid Vehicle Id'}, status=400)
-        img_url = FirebaseUploadImage.upload_image(image_file, 'vehicles')
-        vehicle.image_url = img_url
-        vehicle.save()
-        return Response({'message': 'Image Uploaded', 'vehicle_id': vehicle.id}, status=200)
+        if serializer.is_valid():
+            vehicle_id = serializer.data.get('id')
+            try:            
+                vehicle = Vehicle.objects.get(id=vehicle_id)
+            except Vehicle.DoesNotExist:
+                return Response({'error': 'Invalid Vehicle Id'}, status=400)
+            img_url = FirebaseUploadImage.upload_image(image_file, 'vehicles')
+            vehicle.image_url = img_url
+            vehicle.save()
+            return Response({'message': 'Image Uploaded', 'vehicle_id': vehicle.id}, status=200)
     else:
         return Response({'error': 'Invalid Image File'}, status=400)

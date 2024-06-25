@@ -32,6 +32,11 @@ class OutShortVehicleSerializer(serializers.ModelSerializer):
         model = Vehicle
         fields = ('id', 'model', 'make', 'type', 'license_no', 'image_url')
 
+class VehicleIDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle
+        fields = ('id', )
+
 # class LearnerVehicleSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Vehicle
