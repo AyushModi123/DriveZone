@@ -34,6 +34,18 @@ class IsLearnerPermission(IsAuthenticated, IsActivePermission):
             return request.user.is_learner
         return False
     
+class BlockInstructorPermission(IsAuthenticated, IsActivePermission):
+    def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return not request.user.is_instructor
+        return False
+
+class BlockSchoolPermission(IsAuthenticated, IsActivePermission):
+    def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return not request.user.is_school
+        return False
+
 class RequiredProfileCompletionPermission(IsAuthenticated, IsActivePermission):
     """
     Allows access only to authenticated, active users with the required profile completion level.
