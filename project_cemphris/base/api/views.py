@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils.crypto import get_random_string
 from drf_yasg.utils import swagger_auto_schema
-from base.permissions import RequiredProfileCompletionPermission, IsSchoolPermission
+from base.permissions import RequiredProfileCompletionPermission, IsSchoolPermission, BlockInstructorPermission, BlockSchoolPermission
 from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, send_activation_mail, send_instructor_login_details
 
@@ -136,6 +136,7 @@ def get_user_details(request):
     request_body=LicenseInformationSerializer,    
 )
 @api_view(['POST'])
+@permission_classes([BlockSchoolPermission])
 def upload_license(request):
     current_user = request.user
     image_file = request.FILES.get('image', None)

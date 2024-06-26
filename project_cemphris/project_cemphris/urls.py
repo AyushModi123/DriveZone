@@ -43,7 +43,8 @@ urlpatterns = [
     path('api/bookings/', include('booking.api.urls')),
     path('api/slots/', include('slot.api.urls')),
     path('api/vehicles/', include('vehicle.api.urls')),
-    path('api/rating/', include('rate.api.urls')),    
+    path('api/rating/', include('rate.api.urls')),
+    path('api/courses/', include('course.api.urls')),
 ]
 
 #Swagger Docs
