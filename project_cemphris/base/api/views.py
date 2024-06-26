@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils.crypto import get_random_string
 from drf_yasg.utils import swagger_auto_schema
-from base.permissions import RequiredProfileCompletionPermission, IsSchoolPermission, BlockInstructorPermission, BlockSchoolPermission
+from base.permissions import RequiredProfileCompletionPermission, IsSchoolPermission, BlockInstructorPermission, BlockSchoolPermission, IsNotAuthenticated
 from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, send_activation_mail, send_instructor_login_details
 
@@ -45,7 +45,7 @@ def activate_account(request, uidb64, token):
 )
 @api_view(['POST'])
 @authentication_classes([])
-@permission_classes([])
+@permission_classes([IsNotAuthenticated])
 def signup(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
@@ -62,6 +62,7 @@ def signup(request):
     request_body=SchoolSerializer,    
 )
 @api_view(['POST'])
+@permission_classes([IsNotAuthenticated])
 def create_school(request):
     current_user = request.user
     if current_user.role == RoleChoices.SCHOOL:
@@ -83,9 +84,10 @@ def create_school(request):
 
 @swagger_auto_schema(
     method='post',
-    request_body=SchoolSerializer,    
+    request_body=LearnerSerializer,    
 )
 @api_view(['POST'])
+@permission_classes([IsNotAuthenticated])
 def create_learner(request):
     current_user = request.user
     if current_user.role == RoleChoices.LEARNER:

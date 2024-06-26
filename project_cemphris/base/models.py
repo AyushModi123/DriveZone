@@ -77,11 +77,12 @@ class Learner(models.Model):
         return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language"], 
                 "user": ["license"]
                 }, 6
+    #Update logic here
     @property
     def get_completion_level(self):
         """This property directly depends on get_profile_fields property"""
         temp, total_fields = self.get_profile_fields
-        empty_fields = 0
+        empty_fields = 0.0
         for field in temp["current"]:
             value = getattr(self, field)
             if value in [None, '', [], {}]:
@@ -122,7 +123,7 @@ class Instructor(models.Model):
     def get_completion_level(self):
         """This property directly depends on get_profile_fields property"""
         temp, total_fields = self.get_profile_fields
-        empty_fields = 0
+        empty_fields = 0.0
         for field in temp["current"]:
             value = getattr(self, field)
             if value in [None, '', [], {}]:
@@ -161,7 +162,7 @@ class School(models.Model):
     def get_completion_level(self):
         """This property directly depends on get_profile_fields property"""
         temp, total_fields = self.get_profile_fields
-        empty_fields = 0
+        empty_fields = 0.0
         for field in temp["current"]:
             value = getattr(self, field)
             if value in [None, '', [], {}]:

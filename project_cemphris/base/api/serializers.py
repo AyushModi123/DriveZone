@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
-        
+        # add instructor validation to not create instructor
         return attrs
 
     def create(self, validated_data):
@@ -46,12 +46,17 @@ class LearnerSerializer(serializers.ModelSerializer):
         learner = Learner.objects.create(user=user, **validated_data)
         return learner
 
+class OutLicenseInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LicenseInformation
+        fields = ('number', 'type', 'expiration_date', 'issuing_authority', 'image_url')
+
 class OutLearnerSerializer(serializers.ModelSerializer):
     user = OutUserSerializer()
-
+    license = OutLicenseInformationSerializer(allow_null=True)
     class Meta:
         model = Learner
-        fields = ('user', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language')
+        fields = ('user', 'full_name', 'license', 'location', 'image_url', 'mobile_number', 'preferred_language')
 
 class SchoolSerializer(serializers.ModelSerializer):    
 
@@ -71,10 +76,6 @@ class OutSchoolSerializer(serializers.ModelSerializer):
         model = School
         fields = ['user', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language']
 
-class OutLicenseInformationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LicenseInformation
-        fields = ('number', 'type', 'expiration_date', 'issuing_authority', 'image_url')
 
 class OutInstructorSerializer(serializers.ModelSerializer):
     user = OutUserSerializer()

@@ -4,7 +4,7 @@ from vehicle.models import Vehicle
 class VehicleSerializer(serializers.ModelSerializer):    
     class Meta:
         model = Vehicle
-        fields = ('model', 'make', 'type', 'license_no')
+        fields = ('model', 'make', 'type', 'plate_no')
 
     def create(self, validated_data):
         image_url = validated_data.pop('image_url')
@@ -25,12 +25,12 @@ class VehicleSerializer(serializers.ModelSerializer):
         """Called for type serializer field"""
         return obj.get_type_display()
 
-class OutShortVehicleSerializer(serializers.ModelSerializer):
+class OutVehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
-        fields = ('id', 'model', 'make', 'type', 'license_no', 'image_url')
+        fields = ('id', 'model', 'make', 'type', 'plate_no', 'image_url')
 
 # class LearnerVehicleSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Vehicle
-#         exclude = ('license_no',)
+#         exclude = ('plate_no',)

@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
-from base.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission
+from base.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockInstructorPermission
 from base.models import User, ProfileCompletionLevelChoices
 from vehicle.models import Vehicle
-from .serializers import VehicleSerializer, OutShortVehicleSerializer
+from .serializers import VehicleSerializer, OutVehicleSerializer
 from firebase_utils import FirebaseUploadImage
 
 
@@ -15,14 +15,26 @@ class VehicleView(APIView):
     permission_classes = [IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)]
 
     def get(self, request):
-        q = request.GET.get("q", "")
-        vehicles = Vehicle.objects.filter(
-            Q(model__icontains=q) | 
-            Q(license_no__icontains=q) |
-            Q(make__icontains=q) |
-            Q(type__icontains=q)
-        )
-        return Response({'vehicles': OutShortVehicleSerializer(vehicles, many=True).data}, status=200)
+        current_user = request.user
+        vehicle_id = request.GET.get("id", None)        
+        if vehicle_id is None:
+            q = request.GET.get("q", "")
+            vehicles = Vehicle.objects.filter(
+                Q(school=current_user.school) &
+                (
+                    Q(model__icontains=q) | 
+                    Q(license_no__icontains=q) |
+                    Q(make__icontains=q) |
+                    Q(type__icontains=q)
+                )
+            )
+            return Response({'vehicles': OutVehicleSerializer(vehicles, many=True).data}, status=200)
+        else:
+            try:
+                vehicle = Vehicle.objects.get(id=vehicle_id, school=current_user.school)
+            except Vehicle.DoesNotExist:
+                return Response({"error": "Invalid Vehicle Id"}, status=400)
+            return Response({"vehicle": OutVehicleSerializer(vehicle, many=False)}, status=200)        
 
     def post(self, request):
         serializer = VehicleSerializer(data=request.data)

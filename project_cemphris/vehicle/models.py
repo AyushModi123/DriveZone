@@ -8,7 +8,7 @@ class Vehicle(models.Model):
     model = models.CharField(max_length=50, null=False, blank=False, default='XXXXX')
     make = models.CharField(choices=VehicleChoices.choices, null=False, blank=False)
     type = models.CharField(choices=VehicleTypeChoices.choices, null=False, blank=False)
-    license_no = models.CharField(max_length=15, null=False, blank=False, default='XX000000')
+    plate_no = models.CharField(max_length=15, null=False, blank=False, default='XX000000')
 
     def __str__(self):
         return f"id: {self.id}->{self.get_make_display()} with model {self.model}"
