@@ -62,9 +62,11 @@ def signup(request):
     request_body=SchoolSerializer,    
 )
 @api_view(['POST'])
-@permission_classes([IsNotAuthenticated])
+#IsAuth & IsActive
 def create_school(request):
     current_user = request.user
+    if request.user.is_school:
+        return Response({"message": "School already created"}, 200)
     if current_user.role == RoleChoices.SCHOOL:
         serializer = SchoolSerializer(data=request.data)
         if serializer.is_valid():
@@ -87,7 +89,7 @@ def create_school(request):
     request_body=LearnerSerializer,    
 )
 @api_view(['POST'])
-@permission_classes([IsNotAuthenticated])
+#IsAuth & IsActive
 def create_learner(request):
     current_user = request.user
     if current_user.role == RoleChoices.LEARNER:

@@ -8,8 +8,7 @@ from .choices import ProfileCompletionLevelChoices
 @receiver(post_save, sender=Instructor)
 @receiver(post_save, sender=Learner)
 @receiver(post_save, sender=School)
-def update_profile_completion_level(sender, instance, created, **kwargs):    
-    print(instance.get_completion_level)
+def update_profile_completion_level(sender, instance, created, **kwargs):
     instance.user.profile_completion_level = instance.get_completion_level
     instance.user.save()
 

@@ -91,7 +91,7 @@ class Learner(models.Model):
             if not hasattr(self.user, field):
                 empty_fields+=1
         non_empty_fields = total_fields - empty_fields
-        return (non_empty_fields//total_fields)*100
+        return (non_empty_fields/total_fields)*100
         
 
 class Instructor(models.Model):
@@ -132,7 +132,7 @@ class Instructor(models.Model):
             if not hasattr(self.user, field):
                 empty_fields+=1
         non_empty_fields = total_fields - empty_fields
-        return (non_empty_fields//total_fields)*100
+        return (non_empty_fields/total_fields)*100
     
     
 class School(models.Model):
@@ -171,7 +171,7 @@ class School(models.Model):
             if not hasattr(self, field):
                 empty_fields+=1
         non_empty_fields = total_fields - empty_fields
-        return (non_empty_fields//total_fields)*100
+        return (non_empty_fields/total_fields)*100
 
 class LicenseInformation(models.Model):    
     

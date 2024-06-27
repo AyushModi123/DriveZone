@@ -45,6 +45,12 @@ class BlockSchoolPermission(IsAuthenticated, IsActivePermission):
         if super().has_permission(request, view):
             return not request.user.is_school
         return False
+    
+class BlockLearnerPermission(IsAuthenticated, IsActivePermission):
+    def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return not request.user.is_learner
+        return False
 
 class RequiredProfileCompletionPermission(IsAuthenticated, IsActivePermission):
     """

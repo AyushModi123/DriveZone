@@ -1,12 +1,13 @@
 from rest_framework import serializers
+from datetime import datetime
 from slot.models import Slot
 
 class SlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slot
-        fields = ('slot_start', 'duration')
+        fields = ('start_time', 'duration', 'instructor')
 
-class SemiSlotSerializer(serializers.ModelSerializer):
+class OutSlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slot
-        exclude = ('instructor',)
+        fields = ('instructor', 'start_time', 'duration', 'is_booked')
