@@ -37,7 +37,7 @@ class Slot(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Slot {'booked' if self.is_booked else 'available'} on {self.start_time.astimezone().strftime('%Y-%m-%d %H:%M')} for {self.duration} minutes"
+        return f"Slot {'booked for' if self.is_booked else 'available on'} {self.start_time.astimezone().strftime('%Y-%m-%d %H:%M')} for {self.duration} minutes"
 
     class Meta:
         ordering = ['school', 'start_time', 'instructor']
