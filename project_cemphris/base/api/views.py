@@ -164,6 +164,10 @@ class InstructorView(APIView):
         instructor_id = request.GET.get("id", None)
         if instructor_id is not None:
             try:
+                instructor_id = int(instructor_id)
+            except (TypeError, ValueError):
+                return Response({"message": "Invalid Instructor id"}, status=400)
+            try:
                 instructor = Instructor.objects.get(id=instructor_id, school=current_user.school)
             except Instructor.DoesNotExist:
                 return Response({'error': 'Invalid Instructor ID'}, status=400)

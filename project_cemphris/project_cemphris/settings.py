@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'base.apps.BaseConfig',
     # 'chat.apps.ChatConfig',
-    'rate.apps.RateConfig',
+    'review.apps.ReviewConfig',
     # 'history.apps.HistoryConfig',
     # 'payment.apps.PaymentConfig',
     'jwt_auth.apps.JwtAuthConfig',

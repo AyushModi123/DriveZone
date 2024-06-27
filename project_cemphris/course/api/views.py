@@ -29,6 +29,10 @@ class CourseViewSet(viewsets.ViewSet):
         else:
             school_id = request.GET.get('school_id', None)
             if school_id is not None:
+                try:
+                    school_id = int(school_id)
+                except (TypeError, ValueError):
+                    return Response({"message": "Invalid School id"}, status=400)
                 courses = Course.objects.filter(school=school_id)
                 return Response({"courses": OutCourseSerializer(courses, many=True).data}, status=200)
             else:

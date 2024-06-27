@@ -31,6 +31,10 @@ class VehicleView(APIView):
             return Response({'vehicles': OutVehicleSerializer(vehicles, many=True).data}, status=200)
         else:
             try:
+                vehicle_id = int(vehicle_id)
+            except (TypeError, ValueError):
+                return Response({"message": "Invalid Vehicle id"}, status=400)
+            try:
                 vehicle = Vehicle.objects.get(id=vehicle_id, school=current_user.school)
             except Vehicle.DoesNotExist:
                 return Response({"error": "Invalid Vehicle Id"}, status=400)
