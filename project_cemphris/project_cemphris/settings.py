@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'payment.apps.PaymentConfig',
     'jwt_auth.apps.JwtAuthConfig',
     'vehicle.apps.VehicleConfig',
-    'booking.apps.BookConfig',
+    # 'booking.apps.BookConfig',
     'slot.apps.SlotConfig',
     'course.apps.CourseConfig',
     'rest_framework_swagger',
@@ -165,8 +165,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 # Update this to static site url when deployed
-STATIC_URL = 'https://project-cemphris-static.onrender.com/'
-# STATIC_URL = '/static/'
+# STATIC_URL = 'https://project-cemphris-static.onrender.com/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static_files'
 
 # Default primary key field type
