@@ -9,6 +9,7 @@ class RatingChoices(models.IntegerChoices):
 
 class Review(models.Model):
     school = models.ForeignKey('base.School', on_delete=models.CASCADE, related_name='reviews')
+    learner = models.ForeignKey('base.Learner', on_delete=models.CASCADE, related_name='reviews')
     rating = models.IntegerField(choices=RatingChoices.choices, null=False, blank=False)
     content = models.CharField(max_length=10000, null=False, blank=True, default="")
 
