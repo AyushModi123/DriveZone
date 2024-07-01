@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     # 'booking.apps.BookConfig',
     'slot.apps.SlotConfig',
     'course.apps.CourseConfig',
+    'notif_handler.apps.NotifHandlerConfig',
     'rest_framework_swagger',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -148,6 +149,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Password reset and Email Activation Timeout
+PASSWORD_RESET_TIMEOUT = (60*60)//2  # 30 minutes
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -165,8 +168,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 # Update this to static site url when deployed
-# STATIC_URL = 'https://project-cemphris-static.onrender.com/'
-STATIC_URL = '/static/'
+STATIC_URL = 'https://project-cemphris-static.onrender.com/'
+# STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static_files'
 
 # Default primary key field type
@@ -195,6 +198,7 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
 # PAYMENT_VARIANTS = {
 #     'razorpay': ('django_payments_razorpay.RazorPayProvider', {

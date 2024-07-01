@@ -50,11 +50,14 @@ def signup(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save(is_active=False)        
-        send_activation_mail(request, user)
-        return Response({
-            'user': OutUserSerializer(user, context={'request': request}).data,
-            'message': 'User created successfully. Please activate your account by clicking on the link we sent to your email.'
-        }, status=201)
+        res = send_activation_mail(request, user)
+        if res:
+            return Response({
+                'user': OutUserSerializer(user, context={'request': request}).data,
+                'message': 'User created successfully. Please activate your account by clicking on the link we sent to your email.'
+            }, status=201)
+        else:
+            return Response({"error": "Could not send activation email. Try Again"}, status=500)
     return Response(serializer.errors, status=400)
 
 @swagger_auto_schema(

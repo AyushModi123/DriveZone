@@ -4,6 +4,8 @@ from django.utils.encoding import force_str, force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
+import asyncio
+from project_cemphris.services import schedule_email, send_email
 
 class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):
@@ -21,11 +23,9 @@ def send_activation_mail(request, user):
             'token': activation_token_manager.make_token(user),
         })
     to_email = user.email
-    
-    email = EmailMessage(
-            mail_subject, message, to=[to_email]
-        )
-    email.send()
+
+    res = send_email(subject=mail_subject, recipient=to_email, message=message)
+    return res
 
 def send_instructor_login_details(request, user, school, password):
     current_site = get_current_site(request)
