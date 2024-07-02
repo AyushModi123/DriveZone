@@ -32,6 +32,10 @@ MANIFEST
 *.manifest
 *.spec
 
+# Secret Files
+
+project-cemphris-firebase*
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
