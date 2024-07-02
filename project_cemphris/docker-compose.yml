@@ -1,4 +1,4 @@
-version: '0'
+version: '3'
 
 services:
   pc_app:
@@ -10,6 +10,7 @@ services:
     depends_on:
       - pc_db
     command: sh -c 'python manage.py migrate'
+    #apt-get update;apt-get install cron;echo "*/5 * * * * root /usr/bin/python3 /app/manage.py process_scheduled_emails" >> /etc/crontab;'
   
   pc_db:
     image: postgres:15.7
