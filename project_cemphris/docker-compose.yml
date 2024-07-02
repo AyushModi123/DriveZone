@@ -9,7 +9,7 @@ services:
       - project-cemphris-network
     depends_on:
       - pc_db
-    command: sh -c 'python manage.py migrate'
+    # command: sh -c 'python manage.py migrate'
     #apt-get update;apt-get install cron;echo "*/5 * * * * root /usr/bin/python3 /app/manage.py process_scheduled_emails" >> /etc/crontab;'
   
   pc_db:
