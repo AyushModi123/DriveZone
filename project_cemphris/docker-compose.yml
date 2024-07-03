@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 services:
   pc_app:
@@ -13,6 +13,8 @@ services:
     depends_on:
       - pc_db
       - pc_redis
+    env_file:
+      - ./.env
     # command: sh -c 'python manage.py migrate'
 
   pc_db:
@@ -27,6 +29,8 @@ services:
       POSTGRES_DB: project_cemphris
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: qweasd123
+    env_file:
+      - ./.env
 
   pc_redis:
     image: redis:7-alpine
@@ -34,6 +38,8 @@ services:
       - "6379:6379"
     networks:
       - project-cemphris-network
+    env_file:
+      - ./.env
 
   pc_celery_worker:
     image: ayush/project-cemphris:v0
@@ -43,6 +49,8 @@ services:
     depends_on:
       - pc_db
       - pc_redis
+    env_file:
+      - ./.env
 
   pc_celery_beat:
     image: ayush/project-cemphris:v0
@@ -52,6 +60,8 @@ services:
     depends_on:
       - pc_db
       - pc_redis
+    env_file:
+      - ./.env
 
   pc_celery_flower:
     image: ayush/project-cemphris:v0
@@ -64,6 +74,8 @@ services:
       - pc_db
       - pc_redis
       - pc_celery_worker
+    env_file:
+      - ./.env
 
 networks:
   project-cemphris-network:

@@ -193,8 +193,8 @@ CHANNEL_LAYERS = {
 #     },
 # }
 
-CELERY_BROKER_URL = 'redis://pc_redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://pc_redis:6379/0'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_BACKEND')
 CELERY_BEAT_SCHEDULE = {
     'send-scheduled-emails': {
         'task': 'notif_handler.tasks.send_scheduled_emails',
