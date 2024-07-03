@@ -128,7 +128,7 @@ ASGI_APPLICATION = 'project_cemphris.asgi.application'
 
 DATABASES = {
     'default':
-        dj_database_url.config(default=os.environ.get("DATABASE_URL"))
+        dj_database_url.config(default=os.getenv("DATABASE_URL", 'postgres://postgres:qweasd123@pc_db:5432/project_cemphris'))
 }
 
 
