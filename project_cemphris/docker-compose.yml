@@ -1,21 +1,26 @@
-version: '3'
+version: '3.8'
 
 services:
   pc_app:
-    image: ayush/project-cemphris:v0 # correct db url in this image
+    image: ayush/project-cemphris:v0
     ports:
       - "8000:8000"
+    command:
+      - python manage.py migrate
+      - gunicorn --bind 0.0.0.0:8000 project_cemphris.wsgi:application
     networks:
       - project-cemphris-network
     depends_on:
       - pc_db
+      - pc_redis
     # command: sh -c 'python manage.py migrate'
-    #apt-get update;apt-get install cron;echo "*/5 * * * * root /usr/bin/python3 /app/manage.py process_scheduled_emails" >> /etc/crontab;'
-  
+
   pc_db:
     image: postgres:15.7
     ports:
       - "5432:5432"
+    # volumes:
+    #   - postgres_data:/var/lib/postgresql/data/
     networks:
       - project-cemphris-network
     environment:
@@ -23,6 +28,46 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: qweasd123
 
+  pc_redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - project-cemphris-network
+
+  pc_celery_worker:
+    image: ayush/project-cemphris:v0
+    command: celery -A project_cemphris worker --loglevel=info
+    networks:
+      - project-cemphris-network
+    depends_on:
+      - pc_db
+      - pc_redis
+
+  pc_celery_beat:
+    image: ayush/project-cemphris:v0
+    command: celery -A project_cemphris beat --loglevel=info
+    networks:
+      - project-cemphris-network
+    depends_on:
+      - pc_db
+      - pc_redis
+
+  pc_celery_flower:
+    image: ayush/project-cemphris:v0
+    ports:
+      - 5557:5555
+    command: celery -A project_cemphris --broker="${CELERY_BROKER}" flower
+    networks:
+      - project-cemphris-network
+    depends_on:
+      - pc_db
+      - pc_redis
+      - pc_celery_worker
+
 networks:
   project-cemphris-network:
     driver: bridge
+
+# volumes:
+#   postgres_data

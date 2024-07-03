@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'channels',
     'drf_yasg',
+    'django_celery_beat',
 ]
 
 
@@ -191,6 +192,15 @@ CHANNEL_LAYERS = {
 #         },
 #     },
 # }
+
+CELERY_BROKER_URL = 'redis://pc_redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://pc_redis:6379/0'
+CELERY_BEAT_SCHEDULE = {
+    'send-scheduled-emails': {
+        'task': 'notif_handler.tasks.send_scheduled_emails',
+        'schedule': 300.0,  # In seconds
+    },
+}
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
