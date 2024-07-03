@@ -5,9 +5,9 @@ services:
     image: ayush/project-cemphris:v0
     ports:
       - "8000:8000"
-    command:
-      - python manage.py migrate
-      - gunicorn --bind 0.0.0.0:8000 project_cemphris.wsgi:application
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn --bind 0.0.0.0:8000 project_cemphris.wsgi:application"
     networks:
       - project-cemphris-network
     depends_on:
