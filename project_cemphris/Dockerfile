@@ -13,7 +13,7 @@ COPY . .
 RUN pip install --no-cache-dir -r ./requirements.txt
 
 # Converts Windows line endings to UNIX line endings.
-RUN sed -i 's/\r$//g' /entrypoint
+RUN sed -i 's/\r$//g' ./entrypoint
 
 # Expose the port on which the Django app will run
 EXPOSE 8000
