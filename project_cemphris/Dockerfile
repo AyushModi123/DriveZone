@@ -12,13 +12,14 @@ COPY . .
 # Install dependencies
 RUN pip install --no-cache-dir -r ./requirements.txt
 
+RUN chmod +x ./entrypoint
+
 # Converts Windows line endings to UNIX line endings.
 RUN sed -i 's/\r$//g' ./entrypoint
-
 # Expose the port on which the Django app will run
 EXPOSE 8000
 
-ENTRYPOINT ["/entrypoint"]
+ENTRYPOINT ["./entrypoint"]
 
 # Run the Django app
 # CMD ["gunicorn", "--bind", "0.0.0.0:8000", "project_cemphris.wsgi:application"]
