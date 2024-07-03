@@ -16,7 +16,7 @@ import dj_database_url
 
 try:
     psycopg2.connect(
-        dj_database_url.config(default=${DATABASE_URL})
+        dj_database_url.config(default='postgres://postgres:qweasd123@pc_db:5432/project_cemphris')
     )
 except psycopg2.OperationalError:
     sys.exit(-1)
