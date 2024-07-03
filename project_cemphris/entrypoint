@@ -12,11 +12,14 @@ python << END
 import sys
 
 import psycopg2
-import dj_database_url
 
 try:
     psycopg2.connect(
-        dj_database_url.config(default='postgres://postgres:qweasd123@pc_db:5432/project_cemphris')
+        dbname="project_cemphris",
+        user="postgres",
+        password="qweasd123",
+        host="pc_db",
+        port="5432",
     )
 except psycopg2.OperationalError:
     sys.exit(-1)
