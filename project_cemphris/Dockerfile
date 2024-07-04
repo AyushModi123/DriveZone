@@ -6,11 +6,13 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy everything in current dir to container
-COPY . .
+COPY ./requirements.txt ./requirements.txt
 
 # Install dependencies
 RUN pip install -r ./requirements.txt
+
+# Copy everything in current dir to container
+COPY . .
 
 RUN chmod +x ./entrypoint
 
