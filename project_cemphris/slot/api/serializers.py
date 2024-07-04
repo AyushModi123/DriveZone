@@ -10,4 +10,4 @@ class SlotSerializer(serializers.ModelSerializer):
 class OutSlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slot
-        fields = ('instructor', 'start_time', 'duration', 'is_booked')
+        fields = ('instructor', 'start_time', 'duration', 'is_booked', 'learner')
