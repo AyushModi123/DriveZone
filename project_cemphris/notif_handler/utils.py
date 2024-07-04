@@ -50,7 +50,7 @@ def schedule_email(subject, recipient, body, scheduled_time):
         scheduled_time=scheduled_time,
     )
     email.save()
-    return email
+    return
 
 def send_scheduled_email(scheduled_email):
     subject = scheduled_email.subject

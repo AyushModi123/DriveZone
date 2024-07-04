@@ -6,3 +6,4 @@ class NotifHandlerConfig(AppConfig):
     name = 'notif_handler'
     def ready(self):
         import notif_handler.tasks
+        import notif_handler.signals

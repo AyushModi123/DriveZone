@@ -6,6 +6,7 @@ User = get_user_model()
 
 class ScheduledEmail(models.Model):
 
+    slot = models.ForeignKey('slot.Slot', on_delete=models.CASCADE, related_name='reminder')
     subject = models.CharField(max_length=255, blank=True, null=False)
     body = models.TextField(blank=True, null=False)
     recipient = models.EmailField(null=False, blank=False)

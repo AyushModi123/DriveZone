@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from datetime import timedelta
 from .choices import DurationChoices
 from .validators import validate_start_time
@@ -9,8 +9,9 @@ from .validators import validate_start_time
 
 class Slot(models.Model):    
 
-    school = models.ForeignKey("base.School", on_delete=models.CASCADE, related_name="slots")
-    instructor = models.ForeignKey("base.Instructor", on_delete=models.CASCADE, related_name="teaching_slots")
+    school = models.ForeignKey("base.School", on_delete=models.CASCADE, related_name="slots", null=False, blank=False)
+    instructor = models.ForeignKey("base.Instructor", on_delete=models.CASCADE, related_name="teaching_slots", null=False, blank=False)
+    learner = models.ForeignKey("base.Learner", on_delete=models.CASCADE, related_name="lesson_slots", null=True, blank=False)
     start_time = models.DateTimeField(null=False, blank=False, validators=[validate_start_time])
     duration = models.IntegerField(choices=DurationChoices.choices, default=DurationChoices.ONE_HOUR)
     is_booked = models.BooleanField(default=False)
@@ -18,6 +19,13 @@ class Slot(models.Model):
     @property
     def end_time(self):
         return self.start_time + timedelta(minutes=self.duration)
+    
+    @property
+    def check_learner(self):
+        try:
+            return bool(self.learner)
+        except ObjectDoesNotExist:
+            return False
 
     def clean(self):
         """ Overrides default clean method
