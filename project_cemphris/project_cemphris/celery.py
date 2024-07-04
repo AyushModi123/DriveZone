@@ -3,9 +3,10 @@ import os
 from celery import Celery
 import django
 from django.conf import settings
-from notif_handler.tasks import send_scheduled_emails
 
 django.setup()
+
+from notif_handler.tasks import send_scheduled_emails
 
 app = Celery('project_cemphris')
 
