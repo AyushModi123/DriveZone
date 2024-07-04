@@ -3,7 +3,7 @@ from celery import shared_task
 from .models import ScheduledEmail
 from notif_handler.utils import send_scheduled_email
 
-@shared_task
+@shared_task(name='notif_handler.tasks.send_scheduled_emails')
 def send_scheduled_emails():
     due_emails = ScheduledEmail.objects.filter(
                 scheduled_time__lte=timezone.now(),
