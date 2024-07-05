@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'channels',
     'drf_yasg',
+    'django_extensions',
 ]
 
 
@@ -213,4 +214,9 @@ SWAGGER_SETTINGS = {
         }
     },
     'USE_SESSION_AUTH': True,
+}
+
+GRAPH_MODELS = {
+    'all_applications': True,
+    'group_models': True,
 }
