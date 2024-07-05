@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from project_cemphris.serializers import OutCourseSerializer
 from base.choices import RoleChoices
 from base.models import Instructor, LicenseInformation, Learner, School
 
@@ -54,9 +55,10 @@ class OutLicenseInformationSerializer(serializers.ModelSerializer):
 class OutLearnerSerializer(serializers.ModelSerializer):
     user = OutUserSerializer()
     license = OutLicenseInformationSerializer(allow_null=True)
+    course = OutCourseSerializer(allow_null=True)
     class Meta:
         model = Learner
-        fields = ('id', 'user', 'full_name', 'license', 'location', 'image_url', 'mobile_number', 'preferred_language')
+        fields = ('id', 'user', 'course', 'full_name', 'license', 'location', 'image_url', 'mobile_number', 'preferred_language')
 
 class SchoolSerializer(serializers.ModelSerializer):    
 

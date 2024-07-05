@@ -1,0 +1,1 @@
+from course.api.serializers import OutCourseSerializer

@@ -92,7 +92,13 @@ class Learner(models.Model):
                 empty_fields+=1
         non_empty_fields = total_fields - empty_fields
         return (non_empty_fields/total_fields)*100
-        
+    
+    @property
+    def get_course(self):
+        try:
+            return self.course
+        except ObjectDoesNotExist:
+            return None
 
 class Instructor(models.Model):
     user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='instructor', null=False, blank=False)
