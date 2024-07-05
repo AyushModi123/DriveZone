@@ -76,6 +76,18 @@ class OutSchoolSerializer(serializers.ModelSerializer):
         model = School
         fields = ['id', 'user', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language']
 
+class OutVeryShortSchoolSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = School
+        fields = ['id', 'name', 'location', 'image_url', 'preferred_language']
+
+class OutShortSchoolSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = School
+        fields = ['id', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language']
+
 
 class OutInstructorSerializer(serializers.ModelSerializer):
     user = OutUserSerializer()

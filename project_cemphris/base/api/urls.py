@@ -1,5 +1,11 @@
 from django.urls import path
 from . import views
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+
+router.register(r'schools', viewset=views.SchoolViewSet, basename="schools")
+
 
 urlpatterns = [
     path('',  views.check_api),
@@ -14,3 +20,5 @@ urlpatterns = [
     # path('update-details/', views.update_details, name='update_user_details'),
     # path('update-license/', views.update_license, name='update_license_details'),
 ]
+
+urlpatterns+=router.urls
