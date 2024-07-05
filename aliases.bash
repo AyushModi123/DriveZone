@@ -1,1 +1,2 @@
 alias venv="source project_cemphris_venv/bin/activate"
+alias rundb="docker run --name postgresdb -p 5432:5432 -d -e POSTGRES_DB=project_cemphris -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=qweasd123 postgres:15.7"
