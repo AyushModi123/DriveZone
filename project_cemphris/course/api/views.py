@@ -14,7 +14,7 @@ class CourseViewSet(viewsets.ViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        common_permission_classes = [BlockInstructorPermission, RequiredProfileCompletionPermission(required_level=50)]
+        common_permission_classes = []
         if self.action in ('update', 'create', 'partial_update', 'destroy'):
             permission_classes = common_permission_classes + [IsSchoolPermission]
         else:
@@ -23,7 +23,8 @@ class CourseViewSet(viewsets.ViewSet):
     
     def list(self, request):
         current_user = request.user
-        if current_user.is_school:
+        
+        if current_user.is_authenticated and current_user.is_school:
             courses = Course.objects.filter(school=current_user.school)
             return Response({"courses": OutCourseSerializer(courses, many=True).data}, status=200)
         else:
