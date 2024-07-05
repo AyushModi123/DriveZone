@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'channels',
     'drf_yasg',
-    'django_extensions',
+    # 'django_extensions', # Enable to generate ER Diag
 ]
 
 
