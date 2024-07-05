@@ -9,6 +9,7 @@ from asgiref.sync import async_to_sync
 from project_cemphris.services import schedule_email
 from notif_handler.models import ScheduledEmail, Notification
 from .constants import LEARNER_REMINDER_SUBJECT, INSTRUCTOR_REMINDER_SUBJECT, NotificationTag
+from notif_handler.tasks import send_notification
 
 try:
     Slot = apps.get_model('slot', 'Slot')
@@ -59,15 +60,13 @@ def send_notification(sender, instance, created, **kwargs):
             message=message,            
         )
         notif.save()
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f'notification_{school.user.id}',
-            {
-                'type': 'send_notification',
-                'tag': NotificationTag.NEW_ENROLL,
-                'notification_id': notif.id,
-                'course_id': course.id,
-                'learner_id': learner.id,
-                'message': message
-            }
-        )
+        group_name = f'notification_{school.user.id}'
+        event = {
+            'type': 'send_notification',
+            'tag': NotificationTag.NEW_ENROLL,
+            'notification_id': notif.id,
+            'course_id': course.id,
+            'learner_id': learner.id,
+            'message': message
+        }
+        send_notification.delay(group_name, event)
