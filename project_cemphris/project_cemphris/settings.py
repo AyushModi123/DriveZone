@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     # 'chat.apps.ChatConfig',
     'review.apps.ReviewConfig',
     # 'history.apps.HistoryConfig',
-    # 'payment.apps.PaymentConfig',
+    'payment.apps.PaymentConfig',
     'jwt_auth.apps.JwtAuthConfig',
     'vehicle.apps.VehicleConfig',
     # 'booking.apps.BookConfig',
@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'channels',
     'drf_yasg',
     'django_celery_beat',
+    # 'django_extensions', # Enable to generate ER Diag
 ]
 
 
@@ -73,6 +74,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,  # Default page size
 }
 
 FILER_MIME_TYPE_WHITELIST = [
@@ -225,4 +228,9 @@ SWAGGER_SETTINGS = {
         }
     },
     'USE_SESSION_AUTH': True,
+}
+
+GRAPH_MODELS = {
+    'all_applications': True,
+    'group_models': True,
 }

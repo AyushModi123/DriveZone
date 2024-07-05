@@ -1,6 +1,8 @@
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
@@ -14,8 +16,8 @@ from base.utils import activation_token_manager, send_activation_mail, send_inst
 from base.choices import RoleChoices
 from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer,\
       OutInstructorSerializer, UserSerializer, OutUserSerializer, LicenseInformationSerializer, \
-      OutShortInstructorSerializer, InstructorSerializer
-from base.models import Instructor, Learner, ProfileCompletionLevelChoices
+      OutShortInstructorSerializer, InstructorSerializer, OutShortSchoolSerializer, OutVeryShortSchoolSerializer
+from base.models import Instructor, School, Learner, ProfileCompletionLevelChoices
 
 User = get_user_model()
 
@@ -209,7 +211,45 @@ class InstructorView(APIView):
         return Response(serializer.errors, status=400)
 
 
+class SchoolViewSet(viewsets.ViewSet):
+    permission_classes = []
+    authentication_classes = []
 
+    def list(self, request):
+        query_location: str = request.GET.get("location", "Pune")
+        query_name: str = request.GET.get("name", "")
+        schools = School.objects.filter(
+            Q(location__icontains=query_location) &
+            (
+                Q(name__icontains=query_name)
+            )
+        )
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(schools, request)
+
+        if page is not None:
+            serializer = OutVeryShortSchoolSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        
+        # If pagination is not applied(for compatibility)
+        return Response({'schools': OutVeryShortSchoolSerializer(schools, many=True).data}, status=200)
+
+    def retrieve(self, request, pk=None):
+        query_location: str = request.GET.get("location", "Pune")
+        try:
+            school = School.objects.get(
+                Q(pk=pk) &
+                (
+                    Q(location__icontains=query_location)
+                )
+            )
+        except School.DoesNotExist:
+            return Response({'error': "Invalid School Id"}, status=404)
+        return Response({'school': OutShortSchoolSerializer(school, many=False).data}, status=200)
+
+
+def check_api(request):
+    return Response("Working")
 # @api_view(['PUT'])
 # def update_details(request):
 #     current_user = request.user
@@ -248,9 +288,3 @@ class InstructorView(APIView):
 #         current_user.save()
 #         return Response({"message": "Details Updated Successfully"}, status=200)
 #     return Response(serializer.errors, status=400)
-
-@api_view(['GET'])
-@authentication_classes([])
-@permission_classes([])
-def check_api(request):
-    return Response("Working")

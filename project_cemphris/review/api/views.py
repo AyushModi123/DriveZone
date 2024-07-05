@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
-from base.permissions import RequiredProfileCompletionPermission, BlockInstructorPermission, IsLearnerPermission
+from project_cemphris.permissions import RequiredProfileCompletionPermission, BlockInstructorPermission, IsLearnerPermission
 from .serializers import OutReviewSerializer, ReviewSerializer
 from review.models import Review
 

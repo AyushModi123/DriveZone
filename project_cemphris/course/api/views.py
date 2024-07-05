@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.response import Response
 from rest_framework import viewsets
 from drf_yasg.utils import swagger_auto_schema
-from base.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockInstructorPermission
+from project_cemphris.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockInstructorPermission
 from base.models import User, ProfileCompletionLevelChoices
 from course.models import Course
 from .serializers import CourseSerializer, OutCourseSerializer
@@ -14,7 +14,7 @@ class CourseViewSet(viewsets.ViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        common_permission_classes = [BlockInstructorPermission, RequiredProfileCompletionPermission(required_level=50)]
+        common_permission_classes = []
         if self.action in ('update', 'create', 'partial_update', 'destroy'):
             permission_classes = common_permission_classes + [IsSchoolPermission]
         else:
@@ -23,7 +23,8 @@ class CourseViewSet(viewsets.ViewSet):
     
     def list(self, request):
         current_user = request.user
-        if current_user.is_school:
+        
+        if current_user.is_authenticated and current_user.is_school:
             courses = Course.objects.filter(school=current_user.school)
             return Response({"courses": OutCourseSerializer(courses, many=True).data}, status=200)
         else:

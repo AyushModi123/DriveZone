@@ -18,3 +18,5 @@ django-celery-beat==2.6.0
 redis
 celery[redis]
 flower
+# graphviz
+# django-extensions
