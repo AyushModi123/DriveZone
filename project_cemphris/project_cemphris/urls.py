@@ -21,6 +21,7 @@ from drf_yasg import openapi
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
+from notif_handler.consumers import NotificationConsumer
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -46,9 +47,14 @@ urlpatterns = [
     path('api/review/', include('review.api.urls')),
     path('api/courses/', include('course.api.urls')),
     path('api/payments/', include('payment.api.urls')),
+    path('api/notifications/', include('notif_handler.api.urls')),
 ]
 
 #Swagger Docs
 urlpatterns+= [    
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
+]
+
+websocket_urlpatterns = [
+    path("ws/notifications/", NotificationConsumer.as_asgi())
 ]

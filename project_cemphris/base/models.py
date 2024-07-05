@@ -53,7 +53,14 @@ class User(AbstractUser):
         elif self.is_school:
             return self.school
         else:
-            return None        
+            return None    
+
+    @property
+    def has_any_notifications(self):
+        try:
+            return bool(self.notifications)
+        except ObjectDoesNotExist:
+            return False
 
 class Learner(models.Model):
     user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='learner', null=False, blank=False)

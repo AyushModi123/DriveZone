@@ -15,3 +15,13 @@ class ScheduledEmail(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     retry_count = models.SmallIntegerField(default=0, null=False, blank=False)
+
+class Notification(models.Model):
+    user = models.ForeignKey('base.User', on_delete=models.CASCADE, related_name='notifications', null=False, blank=False)
+    message = models.TextField()
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    tag = models.CharField(max_length=255, blank=True, default='default')
+
+    def __str__(self):
+        return self.message        

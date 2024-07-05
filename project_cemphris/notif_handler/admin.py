@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import ScheduledEmail, Notification
 
-# Register your models here.
+admin.site.register(ScheduledEmail)
+admin.site.register(Notification)
