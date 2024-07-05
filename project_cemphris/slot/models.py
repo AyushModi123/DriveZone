@@ -9,7 +9,7 @@ from .validators import validate_start_time
 
 class Slot(models.Model):    
 
-    school = models.ForeignKey("base.School", on_delete=models.CASCADE, related_name="slots")
+    learner = models.ForeignKey("base.Learner", on_delete=models.CASCADE, related_name="slots")
     instructor = models.ForeignKey("base.Instructor", on_delete=models.CASCADE, related_name="teaching_slots")
     start_time = models.DateTimeField(null=False, blank=False, validators=[validate_start_time])
     duration = models.IntegerField(choices=DurationChoices.choices, default=DurationChoices.ONE_HOUR)
@@ -40,7 +40,7 @@ class Slot(models.Model):
         return f"Slot {'booked for' if self.is_booked else 'available on'} {self.start_time.astimezone().strftime('%Y-%m-%d %H:%M')} for {self.duration} minutes"
 
     class Meta:
-        ordering = ['school', 'start_time', 'instructor']
+        ordering = ['start_time', 'instructor']
         constraints = [
-            models.UniqueConstraint(fields=['school', 'instructor', 'start_time'], name='unique_instructor_slot')
+            models.UniqueConstraint(fields=['instructor', 'start_time'], name='unique_instructor_slot')
         ]
