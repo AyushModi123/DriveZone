@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
-from base.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockLearnerPermission
+from project_cemphris.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockLearnerPermission
 from base.models import User, ProfileCompletionLevelChoices
 from slot.models import Slot
 from .serializers import SlotSerializer, OutSlotSerializer

@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.response import Response
 from rest_framework import viewsets
 from drf_yasg.utils import swagger_auto_schema
-from base.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockInstructorPermission
+from project_cemphris.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockInstructorPermission
 from base.models import User, ProfileCompletionLevelChoices
 from course.models import Course
 from .serializers import CourseSerializer, OutCourseSerializer

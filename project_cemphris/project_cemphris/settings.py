@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     # 'chat.apps.ChatConfig',
     'review.apps.ReviewConfig',
     # 'history.apps.HistoryConfig',
-    # 'payment.apps.PaymentConfig',
+    'payment.apps.PaymentConfig',
     'jwt_auth.apps.JwtAuthConfig',
     'vehicle.apps.VehicleConfig',
     # 'booking.apps.BookConfig',
