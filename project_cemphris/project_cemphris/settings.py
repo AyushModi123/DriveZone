@@ -63,7 +63,7 @@ INSTALLED_APPS = [
     'channels',
     'drf_yasg',
     'django_celery_beat',
-    'django_extensions', # Enable to generate ER Diag
+    # 'django_extensions', # Enable to generate ER Diag
 ]
 
 

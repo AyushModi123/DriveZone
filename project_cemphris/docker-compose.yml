@@ -6,8 +6,8 @@ services:
     ports:
       - "8000:8000"
     command: >
-      sh -c "python manage.py migrate &&
-             gunicorn --bind 0.0.0.0:8000 project_cemphris.wsgi:application"
+      sh -c "python manage.py migrate &&             
+             gunicorn --bind 0.0.0.0:8000 project_cemphris.asgi:application -k uvicorn.workers.UvicornWorker"
     networks:
       - project-cemphris-network
     depends_on:
