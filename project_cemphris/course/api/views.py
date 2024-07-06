@@ -4,8 +4,8 @@ from rest_framework import viewsets
 from drf_yasg.utils import swagger_auto_schema
 from project_cemphris.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockInstructorPermission
 from base.models import User, ProfileCompletionLevelChoices
-from course.models import Course
-from .serializers import CourseSerializer, OutCourseSerializer
+from course.models import Course, EnrollCourse
+from .serializers import CourseSerializer, OutCourseSerializer, EnrollCourseSerializer
 from firebase_utils import FirebaseUploadImage
 
 class CourseViewSet(viewsets.ViewSet):    
@@ -58,3 +58,18 @@ class CourseViewSet(viewsets.ViewSet):
 
     # def destroy(self, request, pk=None):
     #     pass
+
+@api_view(["POST"])
+@permission_classes([IsSchoolPermission])
+def assign_instructor(request):
+    serializer = EnrollCourseSerializer(data=request.data)
+    if serializer.is_valid():
+        try:
+            learner = serializer.validated_data['learner']
+            course = serializer.validated_data['course']
+            enroll_course = EnrollCourse.objects.get(learner=learner, course=course)
+        except EnrollCourse.DoesNotExist:
+            return Response({"error": "Invalid course or learner id"}, status=404)
+        enroll_course = serializer.update(enroll_course, serializer.validated_data)
+        return Response({"message": "Instructor Assigned Successfully"}, status=200)
+    return Response(serializer.errors, status=400)

@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 
 class Course(models.Model):
 
@@ -13,4 +14,9 @@ class EnrollCourse(models.Model):
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='learner_courses')
     instructor = models.ForeignKey('base.Instructor', on_delete=models.CASCADE, null=True, blank=False, related_name='learner_courses')    
 
-    
+    @property
+    def is_instructor_assigned(self):
+        try:
+            return bool(self.instructor)
+        except ObjectDoesNotExist:
+            return False

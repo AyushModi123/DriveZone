@@ -57,7 +57,8 @@ def send_notification(sender, instance, created, **kwargs):
         message = f'{learner.full_name} just enrolled.\n Assign Instructor here'
         notif = Notification.objects.create(
             user=school.user,
-            message=message,            
+            message=message,
+            tag=NotificationTag.NEW_ENROLL
         )
         notif.save()
         group_name = f'notification_{school.user.id}'
@@ -67,6 +68,50 @@ def send_notification(sender, instance, created, **kwargs):
             'notification_id': notif.id,
             'course_id': course.id,
             'learner_id': learner.id,
+            'message': message
+        }
+        send_notification.delay(group_name, event)
+
+@receiver(post_save, sender=EnrollCourse)
+def instructor_assigned(sender, instance, created, **kwargs):    
+    if instance.is_instructor_assigned:
+        learner = instance.learner
+        course = instance.course
+        instructor = instance.instructor        
+        message = f'You have been assigned {instructor.full_name} as your instructor.'
+        notif = Notification.objects.create(
+            user=learner.user,
+            message=message,
+            tag=NotificationTag.INSTRUCTOR_ASSIGNED
+        )
+        notif.save()
+        group_name = f'notification_{learner.user.id}'
+        event = {
+            'type': 'send_notification',
+            'tag': NotificationTag.INSTRUCTOR_ASSIGNED,
+            'notification_id': notif.id,                                
+            'message': message
+        }
+        send_notification.delay(group_name, event)
+
+@receiver(post_save, sender=EnrollCourse)
+def instructor_assigned(sender, instance, created, **kwargs):    
+    if instance.is_instructor_assigned:
+        learner = instance.learner        
+        instructor = instance.instructor        
+        message = f'New learner assigned {learner.full_name}'
+        notif = Notification.objects.create(
+            user=instructor.user,
+            message=message,
+            tag=NotificationTag.LEARNER_ASSIGNED
+        )
+        notif.save()
+        group_name = f'notification_{instructor.user.id}'
+        event = {
+            'type': 'send_notification',
+            'tag': NotificationTag.LEARNER_ASSIGNED,
+            'notification_id': notif.id,
+            'learner_id': learner.id,                                
             'message': message
         }
         send_notification.delay(group_name, event)
