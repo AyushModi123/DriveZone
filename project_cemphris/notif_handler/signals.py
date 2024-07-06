@@ -19,9 +19,9 @@ except LookupError as e:
     raise ImproperlyConfigured(f"Error loading model: {e}")
 
 try:
-    LearnerCourse = apps.get_model('course', 'LearnerCourse')
-    if LearnerCourse is None:
-        raise ImproperlyConfigured("Model 'LearnerCourse' not found in app 'course'")
+    EnrollCourse = apps.get_model('course', 'EnrollCourse')
+    if EnrollCourse is None:
+        raise ImproperlyConfigured("Model 'EnrollCourse' not found in app 'course'")
 except LookupError as e:
     raise ImproperlyConfigured(f"Error loading model: {e}")
 
@@ -48,7 +48,7 @@ def schedule_learner_slot_reminder(sender, instance, created, **kwargs):
             # Handle logic for updation in slot details
             pass
 
-@receiver(post_save, sender=LearnerCourse)
+@receiver(post_save, sender=EnrollCourse)
 def send_notification(sender, instance, created, **kwargs):
     if created:
         learner = instance.learner

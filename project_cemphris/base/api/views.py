@@ -247,6 +247,10 @@ class SchoolViewSet(viewsets.ViewSet):
             return Response({'error': "Invalid School Id"}, status=404)
         return Response({'school': OutShortSchoolSerializer(school, many=False).data}, status=200)
 
+# @api_view(["POST"])
+# @permission_classes([IsSchoolPermission])
+# def assign_instructor(request):
+
 
 def check_api(request):
     return Response("Working")

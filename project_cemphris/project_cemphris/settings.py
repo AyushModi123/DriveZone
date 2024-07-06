@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'slot.apps.SlotConfig',
     'course.apps.CourseConfig',
     'notif_handler.apps.NotifHandlerConfig',
+    'prog_track.apps.ProgTrackConfig',
     'rest_framework_swagger',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -62,7 +63,7 @@ INSTALLED_APPS = [
     'channels',
     'drf_yasg',
     'django_celery_beat',
-    # 'django_extensions', # Enable to generate ER Diag
+    'django_extensions', # Enable to generate ER Diag
 ]
 
 

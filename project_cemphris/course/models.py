@@ -8,7 +8,9 @@ class Course(models.Model):
     def __str__(self):
         return "School: " + self.school.name + " with id: " + str(self.id)
     
-class LearnerCourse(models.Model):
-    learner = models.OneToOneField('base.Learner', on_delete=models.CASCADE, related_name='course')
-    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='enrolled')
+class EnrollCourse(models.Model):
+    learner = models.OneToOneField('base.Learner', on_delete=models.CASCADE, related_name='learner_course')
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='learner_courses')
+    instructor = models.ForeignKey('base.Instructor', on_delete=models.CASCADE, null=True, blank=False, related_name='learner_courses')    
+
     
