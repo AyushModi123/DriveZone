@@ -1,5 +1,6 @@
 # Custom files
 erd.dot
+aliases.bash
 
 # Git
 .git
