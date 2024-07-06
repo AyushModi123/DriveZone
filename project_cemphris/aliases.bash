@@ -15,3 +15,9 @@ alias pmmg="python manage.py migrate"
 alias pmds="python manage.py dbshell"
 # Make ER
 alias pmgm="python manage.py graph_models -a > erd.dot"
+# Git
+alias ga="git add"
+alias gcm="git commit -m"
+alias gp="git push"
+# psql
+alias psql-localhost= "psql -U postgres -h localhost -p 5432"
