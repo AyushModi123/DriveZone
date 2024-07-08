@@ -20,4 +20,4 @@ alias ga="git add"
 alias gcm="git commit -m"
 alias gp="git push"
 # psql
-alias psql-localhost= "psql -U postgres -h localhost -p 5432"
+# alias pslh= "psql -U postgres -h localhost -p 5432"

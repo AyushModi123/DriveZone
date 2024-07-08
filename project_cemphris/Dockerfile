@@ -19,7 +19,7 @@ RUN chmod +x ./entrypoint
 # Converts Windows line endings to UNIX line endings.
 RUN sed -i 's/\r$//g' ./entrypoint
 # Expose the port on which the Django app will run
-EXPOSE 8000
+# EXPOSE 8000
 
 ENTRYPOINT ["./entrypoint"]
 
