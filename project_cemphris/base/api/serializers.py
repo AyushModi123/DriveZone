@@ -37,7 +37,7 @@ class OutUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'role', 'profile_completion_level', 'is_active')
 
-class ResetPasswordEmailSerializer(serializers.ModelSerializer):
+class EmailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email',)

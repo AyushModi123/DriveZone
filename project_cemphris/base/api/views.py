@@ -18,7 +18,7 @@ from base.choices import RoleChoices
 from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer,\
       OutInstructorSerializer, UserSerializer, OutUserSerializer, LicenseInformationSerializer, \
       OutShortInstructorSerializer, InstructorSerializer, OutShortSchoolSerializer, OutVeryShortSchoolSerializer, \
-      ResetPasswordEmailSerializer, ResetPasswordSerializer
+      EmailSerializer, ResetPasswordSerializer
 from base.models import Instructor, School, Learner, ProfileCompletionLevelChoices
 
 logger = logging.getLogger(__file__)
@@ -80,13 +80,13 @@ class PasswordReset(APIView):
 
 @swagger_auto_schema(
     method='post',
-    request_body=ResetPasswordEmailSerializer,    
+    request_body=EmailSerializer,    
 )
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([])
 def password_reset(request):
-    serializer = ResetPasswordEmailSerializer(data=request.data)
+    serializer = EmailSerializer(data=request.data)
     if serializer.is_valid():
         email = serializer.validated_data.get("email", None)
         try:
@@ -114,6 +114,28 @@ def signup(request):
             'user': OutUserSerializer(user, context={'request': request}).data,
             'message': 'User created successfully. Please activate your account by clicking on the link we sent to your email.'
         }, status=201)
+    return Response(serializer.errors, status=400)
+
+@swagger_auto_schema(
+    method='post',
+    request_body=EmailSerializer,    
+)
+@api_view(['POST'])
+@permission_classes([])
+def resend_activation_mail(request):
+    serializer = EmailSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data.get("email")
+        try:
+            user = User.objects.get(email=email)
+            if user.is_active:
+                return Response({"message": "User already activated"}, status=200)
+            send_activation_mail(request, user)
+        except User.DoesNotExist as e:
+            logger.exception(e)
+        return Response({                
+            'message': 'Please activate your account by clicking on the link we sent to your email.'
+        }, status=200)
     return Response(serializer.errors, status=400)
 
 @swagger_auto_schema(

@@ -11,6 +11,7 @@ router.register(r'schools', viewset=views.SchoolViewSet, basename="schools")
 urlpatterns = [
     path('',  views.check_api),
     path('signup/', views.signup, name='signup'),
+    path('send-activation-mail/', views.resend_activation_mail, name='send_activation_mail'),
     path('activate/<uidb64>/<token>/', views.activate_account, name='activate_account'),
     path('upload-image/', views.upload_image, name='upload_profile_image'),
     path('details/', views.get_user_details, name='get_user_details'),
