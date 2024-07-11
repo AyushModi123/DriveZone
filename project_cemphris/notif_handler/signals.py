@@ -49,7 +49,7 @@ def schedule_learner_slot_reminder(sender, instance, created, **kwargs):
             pass
 
 @receiver(post_save, sender=EnrollCourse)
-def send_notification(sender, instance, created, **kwargs):
+def send_notification_signal(sender, instance, created, **kwargs):
     if created:
         learner = instance.learner
         course = instance.course

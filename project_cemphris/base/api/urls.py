@@ -1,6 +1,7 @@
 from django.urls import path
-from . import views
 from rest_framework.routers import DefaultRouter
+from django.contrib.auth import views as auth_views
+from . import views
 
 router = DefaultRouter()
 
@@ -16,7 +17,19 @@ urlpatterns = [
     path('create-school/', views.create_school, name='create-school'),
     path('create-learner/', views.create_learner, name='create-learner'),
     path('upload-license/', views.upload_license, name='upload-license'),
-    path('instructors/', views.InstructorView.as_view(), name='instructors')
+    path('instructors/', views.InstructorView.as_view(), name='instructors'),
+    path("password-reset/", views.password_reset, name="password_reset"),
+    path(
+        "password-reset-confirm/<uidb64>/<token>/", views.PasswordReset.as_view(), 
+        name="password_reset_confirm",
+    ),
+    # path(
+    #     "password-reset-complete/",
+    #     auth_views.PasswordResetCompleteView.as_view(
+    #         template_name="base/password_reset_complete.html"
+    #     ),
+    #     name="password_reset_complete",
+    # ),
     # path('update-details/', views.update_details, name='update_user_details'),
     # path('update-license/', views.update_license, name='update_license_details'),
 ]

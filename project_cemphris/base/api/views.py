@@ -1,3 +1,4 @@
+import logging
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,13 +12,16 @@ from django.utils.crypto import get_random_string
 from drf_yasg.utils import swagger_auto_schema
 from base.permissions import RequiredProfileCompletionPermission, IsSchoolPermission, BlockInstructorPermission, BlockSchoolPermission, IsNotAuthenticated
 from firebase_utils import FirebaseUploadImage
-from base.utils import activation_token_manager, send_activation_mail, send_instructor_login_details
+from base.utils import activation_token_manager, password_reset_token_manager, send_activation_mail, send_instructor_login_details, send_password_reset_email
 
 from base.choices import RoleChoices
 from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer,\
       OutInstructorSerializer, UserSerializer, OutUserSerializer, LicenseInformationSerializer, \
-      OutShortInstructorSerializer, InstructorSerializer, OutShortSchoolSerializer, OutVeryShortSchoolSerializer
+      OutShortInstructorSerializer, InstructorSerializer, OutShortSchoolSerializer, OutVeryShortSchoolSerializer, \
+      ResetPasswordEmailSerializer, ResetPasswordSerializer
 from base.models import Instructor, School, Learner, ProfileCompletionLevelChoices
+
+logger = logging.getLogger(__file__)
 
 User = get_user_model()
 
@@ -40,6 +44,59 @@ def activate_account(request, uidb64, token):
                 return Response("Account Activated Successfully", status=200)
     return Response("Invalid Activation", status=400)
 
+@swagger_auto_schema()
+class PasswordReset(APIView):
+    permission_classes = []
+    authentication_classes = []
+
+    def get(request, uidb64, token):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+        if user is not None:
+            if password_reset_token_manager.check_token(user, token):
+                return Response({"message": "Validated"}, status=200)
+        return Response({'error': 'Invalid Link'}, status=400)
+
+    @swagger_auto_schema(request_body=ResetPasswordSerializer)
+    def post(request, uidb64, token):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+        if user is not None:
+            if password_reset_token_manager.check_token(user, token):
+                serializer = ResetPasswordSerializer(data=request.data)
+                if serializer.is_valid():
+                    user.set_password(serializer.validated_data.get('password'))
+                    user.save()
+                    return Response({'message': 'Password updated'}, status=200)
+                return Response(serializer.errors, status=400)
+        return Response({'error': 'Invalid Link'}, status=400)
+
+
+@swagger_auto_schema(
+    method='post',
+    request_body=ResetPasswordEmailSerializer,    
+)
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def password_reset(request):
+    serializer = ResetPasswordEmailSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data.get("email", None)
+        try:
+            user = User.objects.get(email=email)
+            send_password_reset_email(request, user)
+        except User.DoesNotExist:
+            logger.info("Email not found for password reset request")
+        return Response({'message': 'We have sent password reset link to your email.'}, status=200)
+    return Response(serializer.errors, status=400)
+
 
 @swagger_auto_schema(
     method='post',
@@ -52,14 +109,11 @@ def signup(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save(is_active=False)        
-        res = send_activation_mail(request, user)
-        if res:
-            return Response({
-                'user': OutUserSerializer(user, context={'request': request}).data,
-                'message': 'User created successfully. Please activate your account by clicking on the link we sent to your email.'
-            }, status=201)
-        else:
-            return Response({"error": "Could not send activation email. Try Again"}, status=500)
+        send_activation_mail(request, user)
+        return Response({
+            'user': OutUserSerializer(user, context={'request': request}).data,
+            'message': 'User created successfully. Please activate your account by clicking on the link we sent to your email.'
+        }, status=201)
     return Response(serializer.errors, status=400)
 
 @swagger_auto_schema(

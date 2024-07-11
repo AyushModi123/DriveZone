@@ -5,13 +5,26 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 import asyncio
-from project_cemphris.services import schedule_email, send_email
+from project_cemphris.services import send_email
 
 class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):
         return str(user.pk) + str(timestamp) + str(user.is_active)
 
 activation_token_manager = AccountActivationTokenGenerator()
+password_reset_token_manager = PasswordResetTokenGenerator()
+
+def send_password_reset_email(request, user):
+    current_site = get_current_site(request)
+    mail_subject = 'Reset Account Password'
+    message = render_to_string('base/acc_pass_reset_email.html', {
+            'user': user,
+            'domain': current_site.domain,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': password_reset_token_manager.make_token(user),
+        })
+    to_email = user.email
+    send_email.delay(subject=mail_subject, recipient=to_email, message=message)
 
 def send_activation_mail(request, user):
     current_site = get_current_site(request)
@@ -23,9 +36,7 @@ def send_activation_mail(request, user):
             'token': activation_token_manager.make_token(user),
         })
     to_email = user.email
-
-    res = send_email(subject=mail_subject, recipient=to_email, message=message)
-    return res
+    send_email.delay(subject=mail_subject, recipient=to_email, message=message)
 
 def send_instructor_login_details(request, user, school, password):
     current_site = get_current_site(request)
@@ -37,8 +48,4 @@ def send_instructor_login_details(request, user, school, password):
             'password': password            
         })
     to_email = user.email
-    
-    email = EmailMessage(
-            mail_subject, message, to=[to_email]
-        )
-    email.send()
+    send_email.delay(subject=mail_subject, recipient=to_email, message=message)

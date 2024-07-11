@@ -19,5 +19,6 @@ alias pmgm="python manage.py graph_models -a > erd.dot"
 alias ga="git add"
 alias gcm="git commit -m"
 alias gp="git push"
+alias gc="git checkout"
 # psql
 # alias pslh= "psql -U postgres -h localhost -p 5432"

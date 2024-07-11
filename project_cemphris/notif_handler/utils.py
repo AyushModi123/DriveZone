@@ -1,8 +1,7 @@
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from django.core.mail import send_mail
-from .models import ScheduledEmail
-
+from notif_handler.models import ScheduledEmail
+from notif_handler.tasks import send_email
 # class EmailRateLimiter:
 #     def __init__(self, key_prefix='email_rate_limit', limit=100, period=3600):
 #         self.key_prefix = key_prefix
@@ -19,20 +18,20 @@ from .models import ScheduledEmail
 
 # rate_limiter = EmailRateLimiter()
 
-def send_email(subject, recipient, message):
-    """Sends email synchronously right away"""
-    try:
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=None,  # Uses DEFAULT_FROM_EMAIL from settings
-            recipient_list=[recipient],
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Error sending email synchronously: {str(e)}")
-        return False
+# def send_email(subject, recipient, message):
+#     """Sends email synchronously right away"""
+#     try:
+#         send_mail(
+#             subject=subject,
+#             message=message,
+#             from_email=None,  # Uses DEFAULT_FROM_EMAIL from settings
+#             recipient_list=[recipient],
+#             fail_silently=False,
+#         )
+#         return True
+#     except Exception as e:
+#         print(f"Error sending email synchronously: {str(e)}")
+#         return False
 
 
 def schedule_email(subject, recipient, body, scheduled_time):
@@ -56,11 +55,5 @@ def send_scheduled_email(scheduled_email):
     subject = scheduled_email.subject
     body = scheduled_email.body
     recipient = scheduled_email.recipient
-    res = send_email(subject=subject, body=body, recipient=recipient)
-    if res:
-        scheduled_email.status = 'SENT'
-    else:
-        scheduled_email.status = 'FAILED'
-        scheduled_email.retry_count += 1
-        print("SCHEDULED EMAIL FAILED")
-    scheduled_email.save()
+    send_email.delay(subject=subject, body=body, recipient=recipient)
+    
