@@ -24,14 +24,8 @@ urlpatterns = [
         "password-reset-confirm/<uidb64>/<token>/", views.PasswordReset.as_view(), 
         name="password_reset_confirm",
     ),
-    # path(
-    #     "password-reset-complete/",
-    #     auth_views.PasswordResetCompleteView.as_view(
-    #         template_name="base/password_reset_complete.html"
-    #     ),
-    #     name="password_reset_complete",
-    # ),
-    # path('update-details/', views.update_details, name='update_user_details'),
+    path('update-learner/', views.update_learner, name='update_learner_details'),
+    path('update-school/', views.update_school, name='update_school_details'),
     # path('update-license/', views.update_license, name='update_license_details'),
 ]
 

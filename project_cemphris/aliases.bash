@@ -22,3 +22,6 @@ alias gp="git push"
 alias gc="git checkout"
 # psql
 # alias pslh= "psql -U postgres -h localhost -p 5432"
+# Firewall
+alias fwe="sudo ufw enable"
+alias fwd="sudo ufw disable"

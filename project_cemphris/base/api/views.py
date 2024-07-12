@@ -10,9 +10,11 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils.crypto import get_random_string
 from drf_yasg.utils import swagger_auto_schema
-from base.permissions import RequiredProfileCompletionPermission, IsSchoolPermission, BlockInstructorPermission, BlockSchoolPermission, IsNotAuthenticated
+from base.permissions import RequiredProfileCompletionPermission, IsSchoolPermission, BlockInstructorPermission, \
+    BlockSchoolPermission, IsNotAuthenticated, IsLearnerPermission
 from firebase_utils import FirebaseUploadImage
-from base.utils import activation_token_manager, password_reset_token_manager, send_activation_mail, send_instructor_login_details, send_password_reset_email
+from base.utils import activation_token_manager, password_reset_token_manager, send_activation_mail, \
+    send_instructor_login_details, send_password_reset_email
 
 from base.choices import RoleChoices
 from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer,\
@@ -189,6 +191,35 @@ def create_learner(request):
         return Response(serializer.errors, status=400)
     else:
         return Response({"error": "Role Mismatch"}, status=400)
+
+@swagger_auto_schema(
+    method='patch',
+    request_body=LearnerSerializer,    
+)
+@api_view(['PATCH'])
+@permission_classes([IsLearnerPermission])
+def update_learner(request):
+    current_user = request.user
+    serializer = LearnerSerializer(current_user.learner, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"user": serializer.data}, status=200)
+    return Response(serializer.errors, status=400)
+
+@swagger_auto_schema(
+    method='patch',
+    request_body=SchoolSerializer,    
+)
+@api_view(['PATCH'])
+@permission_classes([IsSchoolPermission])
+def update_school(request):
+    current_user = request.user
+    serializer = SchoolSerializer(current_user.school, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"user": serializer.data}, status=200)
+    return Response(serializer.errors, status=400)
+
 
 @api_view(['POST'])
 def upload_image(request):
