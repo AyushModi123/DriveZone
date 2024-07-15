@@ -18,7 +18,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_cemphris.settings')
 import django
 django.setup()
 
-from .urls import websocket_urlpatterns
+from project_cemphris.urls import websocket_urlpatterns
 
 # application = get_asgi_application()
 

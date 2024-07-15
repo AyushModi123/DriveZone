@@ -15,6 +15,7 @@ services:
       - pc_app
       - pc_celery_flower
   pc_app:
+    build: .
     image: ayush/project-cemphris:v0
     expose:
      - "8000"

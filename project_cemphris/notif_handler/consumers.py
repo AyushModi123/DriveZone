@@ -1,7 +1,10 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.template import Context, Template
-import json 
+import json
+import logging 
 from .models import Notification
+
+logger = logging.getLogger(__file__)
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     
@@ -14,15 +17,21 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(f"notification_{self.user.id}", self.channel_name)
         
     async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        read = text_data_json["read"]
-        notif_id = text_data_json["notification_id"]
         try:
-            notif = Notification.objects.get(id=notif_id)
+            text_data_json = json.loads(text_data)
+        except json.JSONDecodeError as e:
+            logger.exception(e)
+            return
+        read = text_data_json.get("read", None)
+        notif_id = text_data_json.get("notification_id", None)
+        try:
+            notif = await Notification.objects.aget(id=notif_id)
             notif.read = read
-            notif.save()
-        except Notification.DoesNotExist:
-            pass
+            await notif.asave()
+        except Notification.DoesNotExist as e:
+            logger.exception(e)
+        except Exception as e:
+            logger.exception(e)
 
     async def send_notification(self, event):
         message = event["message"]
