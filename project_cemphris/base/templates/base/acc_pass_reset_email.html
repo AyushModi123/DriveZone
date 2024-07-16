@@ -3,5 +3,7 @@ Hi {{ user.username }},
 
 Please click the link below to reset your account password:
 
-http://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+<!-- http://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %} -->
+https://drivezone.vercel.app/reset-password/{{ uid }}/{{ token }}
+
 {% endautoescape %}

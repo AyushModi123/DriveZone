@@ -10,10 +10,10 @@ from .serializers import VehicleSerializer, OutVehicleSerializer
 from firebase_utils import FirebaseUploadImage
 
 
-
+@swagger_auto_schema()
 class VehicleView(APIView):
     permission_classes = [IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)]
-
+    @swagger_auto_schema()
     def get(self, request):
         current_user = request.user
         vehicle_id = request.GET.get("id", None)        
@@ -39,7 +39,7 @@ class VehicleView(APIView):
             except Vehicle.DoesNotExist:
                 return Response({"error": "Invalid Vehicle Id"}, status=400)
             return Response({"vehicle": OutVehicleSerializer(vehicle, many=False)}, status=200)        
-
+    @swagger_auto_schema(request_body=VehicleSerializer)
     def post(self, request):
         serializer = VehicleSerializer(data=request.data)
         image_file = request.FILES.get('image', None)

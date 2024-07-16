@@ -34,6 +34,7 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
   'http://localhost:3000',
+  'https://drivezone.vercel.app'
 )
 # Application definition
 
@@ -86,10 +87,10 @@ FILER_MIME_TYPE_WHITELIST = [
 ]
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=15),
     'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
-    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=15),
     'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
 }
 
@@ -132,7 +133,7 @@ ASGI_APPLICATION = 'project_cemphris.asgi.application'
 
 DATABASES = {
     'default':
-        dj_database_url.config(default='postgres://postgres:qweasd123@pc_db:5432/project_cemphris')
+        dj_database_url.config(default='postgres://avnadmin:AVNS_ho6eX4d4xiBo-6rrtEg@pg-16b2c8b5-ayush-67e7.d.aivencloud.com:11755/defaultdb?sslmode=require')
 }
 
 
@@ -219,17 +220,17 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 #         'public_key': 'RAZORPAY_PUBLIC_KEY',
 #         'secret_key': 'RAZORPAY_SECRET_KEY'})}
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header',
-            'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
-        }
-    },
-    'USE_SESSION_AUTH': True,
-}
+# SWAGGER_SETTINGS = {
+#     'SECURITY_DEFINITIONS': {
+#         'Bearer': {
+#             'type': 'apiKey',
+#             'name': 'Authorization',
+#             'in': 'header',
+#             'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
+#         }
+#     },
+#     'USE_SESSION_AUTH': True,
+# }
 
 GRAPH_MODELS = {
     'all_applications': True,
