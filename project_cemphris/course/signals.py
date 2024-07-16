@@ -10,6 +10,7 @@ def enroll_course(sender, instance, created, **kwargs):
         if instance.status == PaymentStatusTypeChoices.COMPLETE:
             learner_course = EnrollCourse.objects.create(
                 learner=instance.learner,
-                course=instance.course
+                course=instance.course,
+                payment=instance.pk
             )
             learner_course.save()

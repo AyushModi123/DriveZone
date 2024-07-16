@@ -4,12 +4,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
+from django.conf import settings
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils.crypto import get_random_string
 from drf_yasg.utils import swagger_auto_schema
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from base.permissions import RequiredProfileCompletionPermission, IsSchoolPermission, BlockInstructorPermission, \
     BlockSchoolPermission, IsNotAuthenticated, IsLearnerPermission
 from firebase_utils import FirebaseUploadImage
@@ -235,6 +239,8 @@ def upload_image(request):
         return Response({'error': 'Invalid Image File'}, status=400)
     
 
+@cache_page(settings.CACHE_TTL)
+@vary_on_headers("Authorization")
 @api_view(['GET'])
 def get_user_details(request):
     current_user = request.user
@@ -270,7 +276,8 @@ def upload_license(request):
 @swagger_auto_schema()
 class InstructorView(APIView):
     permission_classes = [IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)]
-
+    @method_decorator(cache_page(settings.CACHE_TTL * 10))
+    @method_decorator(vary_on_headers("Authorization"))
     def get(self, request):
         current_user = request.user
         instructor_id = request.GET.get("id", None)
@@ -322,6 +329,8 @@ class SchoolViewSet(viewsets.ViewSet):
     permission_classes = []
     authentication_classes = []
 
+    @method_decorator(cache_page(settings.CACHE_TTL * 10))
+    @method_decorator(vary_on_cookie)
     def list(self, request):
         query_location: str = request.GET.get("location", "Pune")
         query_name: str = request.GET.get("name", "")
@@ -341,6 +350,8 @@ class SchoolViewSet(viewsets.ViewSet):
         # If pagination is not applied(for compatibility)
         return Response({'schools': OutVeryShortSchoolSerializer(schools, many=True).data}, status=200)
 
+    @method_decorator(cache_page(settings.CACHE_TTL * 10))
+    @method_decorator(vary_on_cookie)
     def retrieve(self, request, pk=None):
         query_location: str = request.GET.get("location", "Pune")
         try:
@@ -354,7 +365,8 @@ class SchoolViewSet(viewsets.ViewSet):
             return Response({'error': "Invalid School Id"}, status=404)
         return Response({'school': OutShortSchoolSerializer(school, many=False).data}, status=200)
 
-
+@cache_page(settings.CACHE_TTL)
+@vary_on_cookie
 def check_api(request):
     return Response("Working")
 # @api_view(['PUT'])

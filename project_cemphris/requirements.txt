@@ -16,6 +16,7 @@ firebase-admin
 Pillow
 celery==5.3.6
 django-celery-beat==2.6.0
+django-redis
 redis
 celery[redis]
 flower

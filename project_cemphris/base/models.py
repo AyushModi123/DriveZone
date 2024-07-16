@@ -10,7 +10,7 @@ from .choices import ProfileCompletionLevelChoices, LicenseIssuingAuthorityChoic
 class User(AbstractUser):    
     username = models.CharField(null=False, blank=True, unique=False, default="")
     profile_completion_level = models.PositiveSmallIntegerField(validators=[MaxValueValidator(100)], null=False, blank=False, default=10)
-    email = models.EmailField(unique=True, null=False, blank=False)
+    email = models.EmailField(unique=True, null=False, blank=False, db_index=True)
     role = models.CharField(max_length=50, choices=RoleChoices.choices, null=False, blank=False)
     # TODO: set role as editable false later
     USERNAME_FIELD = 'email'

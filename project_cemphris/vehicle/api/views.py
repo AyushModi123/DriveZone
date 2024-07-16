@@ -2,6 +2,10 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q
+from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from drf_yasg.utils import swagger_auto_schema
 from project_cemphris.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockInstructorPermission
 from base.models import User, ProfileCompletionLevelChoices
@@ -13,6 +17,8 @@ from firebase_utils import FirebaseUploadImage
 @swagger_auto_schema()
 class VehicleView(APIView):
     permission_classes = [IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)]
+    @method_decorator(cache_page(settings.CACHE_TTL))
+    @method_decorator(vary_on_headers("Authorization"))
     @swagger_auto_schema()
     def get(self, request):
         current_user = request.user
@@ -38,7 +44,8 @@ class VehicleView(APIView):
                 vehicle = Vehicle.objects.get(id=vehicle_id, school=current_user.school)
             except Vehicle.DoesNotExist:
                 return Response({"error": "Invalid Vehicle Id"}, status=400)
-            return Response({"vehicle": OutVehicleSerializer(vehicle, many=False)}, status=200)        
+            return Response({"vehicle": OutVehicleSerializer(vehicle, many=False)}, status=200)
+
     @swagger_auto_schema(request_body=VehicleSerializer)
     def post(self, request):
         serializer = VehicleSerializer(data=request.data)
