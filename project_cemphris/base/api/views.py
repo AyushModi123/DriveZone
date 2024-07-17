@@ -24,7 +24,7 @@ from base.choices import RoleChoices
 from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer,\
       OutInstructorSerializer, UserSerializer, OutUserSerializer, LicenseInformationSerializer, \
       OutShortInstructorSerializer, InstructorSerializer, OutShortSchoolSerializer, OutVeryShortSchoolSerializer, \
-      EmailSerializer, ResetPasswordSerializer
+      EmailSerializer, ResetPasswordSerializer, ImageUploadSerializer
 from base.models import Instructor, School, Learner, ProfileCompletionLevelChoices
 
 logger = logging.getLogger(__file__)
@@ -157,12 +157,11 @@ def create_school(request):
     if current_user.role == RoleChoices.SCHOOL:
         serializer = SchoolSerializer(data=request.data)
         if serializer.is_valid():
-            school = serializer.save(user=current_user)
-            image_file = request.FILES.get('image', None)
+            image_file = serializer.validated_data.pop('image', None)
+            image_url = ""
             if image_file is not None:
-                img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
-                school.image_url = img_url
-                school.save()
+                image_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+            school = serializer.save(user=current_user, image_url=image_url)            
             return Response({
                 'user': SchoolSerializer(school, context={'request': request}).data,
                 'message': 'School created successfully.'
@@ -182,14 +181,13 @@ def create_learner(request):
     if current_user.role == RoleChoices.LEARNER:
         serializer = LearnerSerializer(data=request.data)
         if serializer.is_valid():
-            school = serializer.save(user=request.user)                        
-            image_file = request.FILES.get('image', None)
-            if image_file:
-                img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
-                school.image_url = img_url
-                school.save()
+            image_file = serializer.validated_data.pop('image', None)
+            image_url = ""
+            if image_file is not None:
+                image_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+            learner = serializer.save(user=request.user, image_url=image_url)
             return Response({
-                'user': LearnerSerializer(school, context={'request': request}).data,
+                'user': LearnerSerializer(learner, context={'request': request}).data,
                 'message': 'Learner created successfully.'
             }, status=201)
         return Response(serializer.errors, status=400)
@@ -225,16 +223,17 @@ def update_school(request):
     return Response(serializer.errors, status=400)
 
 
-@api_view(['POST'])
+@api_view(['PUT'])
 def upload_image(request):
     current_user = request.user
-    image_file = request.FILES.get('image', None)    
+    serializer = ImageUploadSerializer(data=request.FILES)
     current_user_role_model = current_user.get_role_model
-    if image_file:
-        img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
-        current_user_role_model.image_url = img_url
+    if serializer.is_valid():
+        image_file = serializer.validated_data.get('image')
+        image_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+        current_user_role_model.image_url = image_url
         current_user_role_model.save()
-        return Response({'message': 'Image Uploaded', 'image_url': img_url}, status=201)
+        return Response({'message': 'Image Uploaded', 'image_url': image_url}, status=200)
     else:
         return Response({'error': 'Invalid Image File'}, status=400)
     
@@ -261,17 +260,16 @@ def get_user_details(request):
 @permission_classes([BlockSchoolPermission])
 def upload_license(request):
     current_user = request.user
-    image_file = request.FILES.get('image', None)
     serializer = LicenseInformationSerializer(data=request.data)    
-    if image_file:
-        if serializer.is_valid():
-            img_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
-            serializer.save(image_url=img_url, user=current_user)
-            return Response({'message': 'License uploaded successfully', 'image_url': img_url}, status=201)
-        else:
-            return Response(serializer.errors, status=400)
+    if serializer.is_valid():        
+        image_file = serializer.validated_data.pop('image', None)
+        image_url = ""
+        if image_file is not None:
+            image_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
+        license = serializer.save(image_url=image_url, user=current_user)
+        return Response({'message': 'License uploaded successfully', 'image_url': image_url}, status=201)
     else:
-        return Response({'error': 'Invalid Image File'}, status=400)
+        return Response(serializer.errors, status=400)
     
 @swagger_auto_schema()
 class InstructorView(APIView):
@@ -309,19 +307,18 @@ class InstructorView(APIView):
         current_user = request.user
         serializer = InstructorSerializer(data=request.data)
         if serializer.is_valid():
-            random_password = get_random_string(length=12)
-            instructor = serializer.save(is_active=False, password=random_password, school=current_user.school)
-            image_file = request.FILES.get('image', None)
+            image_file = serializer.validated_data.pop('image', None)
+            image_url = ""
             if image_file is not None:
-                img_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
-                instructor.image_url = img_url
-                instructor.save()
+                image_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+            random_password = get_random_string(length=12)
+            instructor = serializer.save(is_active=False, password=random_password, school=current_user.school, image_url=image_url)
             send_activation_mail(request, instructor.user)
             send_instructor_login_details(request, instructor.user, current_user.school, random_password)
             return Response({
             'user': OutShortInstructorSerializer(instructor, context={'request': request}).data,
             'message': 'Instructor created successfully. Account will be activated once the instructor clicks on the link sent to their email'
-        }, status=201)
+                }, status=201)
         return Response(serializer.errors, status=400)
 
 

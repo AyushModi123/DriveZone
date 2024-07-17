@@ -1,10 +1,12 @@
 from rest_framework import serializers
+from base.api.serializers import ImageUploadSerializer
 from vehicle.models import Vehicle
 
-class VehicleSerializer(serializers.ModelSerializer):    
+class VehicleSerializer(serializers.ModelSerializer):
+    image = ImageUploadSerializer(required=False)
     class Meta:
         model = Vehicle
-        fields = ('model', 'make', 'type', 'plate_no')
+        fields = ('model', 'make', 'type', 'plate_no', 'image')
 
     def create(self, validated_data):
         image_url = validated_data.pop('image_url')

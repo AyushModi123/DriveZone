@@ -10,7 +10,7 @@ from drf_yasg.utils import swagger_auto_schema
 from project_cemphris.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockInstructorPermission
 from base.models import User, ProfileCompletionLevelChoices
 from vehicle.models import Vehicle
-from .serializers import VehicleSerializer, OutVehicleSerializer
+from .serializers import VehicleSerializer, OutVehicleSerializer, ImageUploadSerializer
 from firebase_utils import FirebaseUploadImage
 
 
@@ -49,19 +49,18 @@ class VehicleView(APIView):
     @swagger_auto_schema(request_body=VehicleSerializer)
     def post(self, request):
         serializer = VehicleSerializer(data=request.data)
-        image_file = request.FILES.get('image', None)
-        if image_file:
-            if serializer.is_valid():            
-                img_url = FirebaseUploadImage.upload_image(image_file, 'vehicles')
-                vehicle = serializer.save(
-                    image_url=img_url, 
-                    school=request.user.school
-                )
-                return Response({'message': 'Vehicle Saved', 'vehicle_id': vehicle.id, 'image_url': img_url}, status=201)
-            else:
-                return Response(serializer.errors, status=400)
+        if serializer.is_valid():            
+            image_file = serializer.validated_data.pop('image', None)
+            image_url = ""
+            if image_file is not None:
+                image_url = FirebaseUploadImage.upload_image(image_file, 'vehicles')
+            vehicle = serializer.save(
+                image_url=image_url, 
+                school=request.user.school
+            )
+            return Response({'message': 'Vehicle Saved', 'vehicle_id': vehicle.id, 'image_url': image_url}, status=201)
         else:
-            return Response({'error': 'Invalid Image File'}, status=400)
+            return Response(serializer.errors, status=400)
 
 # @api_view(['GET'])
 # def get_vehicle(request):
@@ -97,16 +96,21 @@ class VehicleView(APIView):
 @api_view(['PUT'])
 @permission_classes([IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)])
 def upload_image(request):
-    image_file = request.FILES.get('image', None)
-    vehicle_id = request.data.get('id', None)    
-    if image_file:        
+    serializer = ImageUploadSerializer(data=request.FILES)
+    vehicle_id = request.data.get('id', None)
+    try:
+        vehicle_id = int(vehicle_id)
+    except (TypeError, ValueError):
+        return Response({"error": "Invalid vehicle id"}, status=400)
+    if serializer.is_valid():        
             try:            
                 vehicle = Vehicle.objects.get(id=vehicle_id)
             except Vehicle.DoesNotExist:
                 return Response({'error': 'Invalid Vehicle Id'}, status=400)
-            img_url = FirebaseUploadImage.upload_image(image_file, 'vehicles')
-            vehicle.image_url = img_url
+            image_file = serializer.validated_data.get('image')
+            image_url = FirebaseUploadImage.upload_image(image_file, 'vehicles')
+            vehicle.image_url = image_url
             vehicle.save()
-            return Response({'message': 'Image Uploaded', 'vehicle_id': vehicle.id}, status=200)
+            return Response({'message': 'Image Uploaded', 'vehicle_id': vehicle.id, 'image_url': image_url}, status=200)
     else:
         return Response({'error': 'Invalid Image File'}, status=400)

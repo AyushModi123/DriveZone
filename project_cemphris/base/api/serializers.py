@@ -1,11 +1,26 @@
 from rest_framework import serializers
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.core.validators import FileExtensionValidator
 from project_cemphris.serializers import OutCourseSerializer
 from base.choices import RoleChoices
 from base.models import Instructor, LicenseInformation, Learner, School
 
 User = get_user_model()
+
+class ImageUploadSerializer(serializers.Serializer):
+    image = serializers.ImageField(
+        validators=[
+            FileExtensionValidator(allowed_extensions=settings.ALLOWED_IMAGE_EXTENSIONS)
+        ]
+    )
+
+    def validate_image(self, value):
+        # Check the file size
+        if value.size > settings.MAX_IMAGE_FILE_SIZE:
+            raise serializers.ValidationError(f"File size exceeds the maximum limit of {settings.MAX_IMAGE_FILE_SIZE / (1024 * 1024)} MB.")
+        return value
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -50,9 +65,10 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
         fields = ('password', 'password2')
 
 class LearnerSerializer(serializers.ModelSerializer):    
+    image = ImageUploadSerializer(required=False)
     class Meta:
         model = Learner
-        fields = ['full_name', 'location', 'mobile_number', 'preferred_language']
+        fields = ['full_name', 'location', 'mobile_number', 'preferred_language', 'image']
 
     def create(self, validated_data):
         user = validated_data.pop('user')
@@ -73,10 +89,10 @@ class OutLearnerSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'course', 'full_name', 'license', 'location', 'image_url', 'mobile_number', 'preferred_language')
 
 class SchoolSerializer(serializers.ModelSerializer):    
-
+    image = ImageUploadSerializer(required=False)
     class Meta:
         model = School
-        fields = ['name', 'location', 'mobile_number', 'preferred_language', 'desc']
+        fields = ['name', 'location', 'mobile_number', 'preferred_language', 'desc', 'image']
     
     def create(self, validated_data):        
         user = validated_data.pop('user')
@@ -126,10 +142,11 @@ class OutInstructorSerializer(serializers.ModelSerializer):
         """Called for area_of_expertise serializer field"""
         return obj.get_area_of_expertise_display()
 
-class LicenseInformationSerializer(serializers.ModelSerializer):    
+class LicenseInformationSerializer(serializers.ModelSerializer):
+    image = ImageUploadSerializer(required=False)    
     class Meta:
         model = LicenseInformation
-        fields = ('number', 'type', 'expiration_date', 'issuing_authority')
+        fields = ('number', 'type', 'expiration_date', 'issuing_authority', 'image')
     
     def create(self, validated_data):
         image_url = validated_data.pop('image_url')
@@ -150,10 +167,11 @@ class OutShortInstructorSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'full_name', 'location', 'image_url', 'preferred_language', 'experience')
 
 class InstructorSerializer(serializers.ModelSerializer):
+    image = ImageUploadSerializer(required=False)
     email = serializers.EmailField(required=True)
     class Meta:
         model = Instructor
-        fields = ('email', 'full_name', 'location', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise')
+        fields = ('email', 'full_name', 'location', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise', 'image')
 
     def create(self, validated_data):
         is_active = validated_data.pop('is_active', False)

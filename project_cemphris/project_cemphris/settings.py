@@ -86,6 +86,15 @@ FILER_MIME_TYPE_WHITELIST = [
     "image/png",
 ]
 
+ALLOWED_IMAGE_EXTENSIONS = [
+    'jpg',
+    'jpeg',
+    'png',
+    'webp',
+    'jfif',
+]
+MAX_IMAGE_FILE_SIZE = 1024 * 1024  # Bytes
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=15),
