@@ -25,11 +25,7 @@ def checkout(request):
     except PaymentDetail.DoesNotExist:
         serializer = PaymentSerializer(data=request.data)
         if serializer.is_valid():
-            try:
-                course = Course.objects.get(pk=serializer.validated_data.get("course"))
-            except Course.DoesNotExist as e:
-                logger.exception("Invalid Course Id", e)
-                return Response({"error": "Invalid Course Id"}, status=400)
+            course = serializer.validated_data.get("course")
             payment = serializer.save(learner=current_user.learner, school=course.school, status=PaymentStatusTypeChoices.COMPLETE)
             return Response({"message": "Payment Successful", "payment_id": payment.id}, status=200)
         return Response(serializer.errors, status=400)
