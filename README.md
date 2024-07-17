@@ -17,3 +17,8 @@
 
 
 ![alt text](graphviz.png)
+
+# TODO FEATURES
+
+- One School User can create multiple sub accounts with limited permissions to manage the school account.  
+- Query Box on school page for learners, can be chatapp or email.  

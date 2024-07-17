@@ -10,7 +10,7 @@ from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from datetime import timedelta
-from slot.constants import SLOT_BACKWARD_QUERY_LIMIT, SLOT_FORWARD_QUERY_LIMIT
+from slot.constants import DEFAULT_SLOT_BACKWARD_QUERY_LIMIT, DEFAULT_SLOT_FORWARD_QUERY_LIMIT
 from project_cemphris.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockLearnerPermission
 from base.models import User, ProfileCompletionLevelChoices
 from slot.models import Slot
@@ -34,18 +34,18 @@ class SlotView(APIView):
         current_user = request.user
         if current_user.is_school:
             q = request.GET.get("q", "")
-            blimit = request.GET.get("blimit", SLOT_BACKWARD_QUERY_LIMIT)
-            flimit = request.GET.get("flimit", SLOT_FORWARD_QUERY_LIMIT)
+            blimit = request.GET.get("blimit", DEFAULT_SLOT_BACKWARD_QUERY_LIMIT)
+            flimit = request.GET.get("flimit", DEFAULT_SLOT_FORWARD_QUERY_LIMIT)
             try:
                 blimit = int(blimit)                
             except (TypeError, ValueError):
-                logger.info(f"Invalid blimit. Setting blimit to default {SLOT_BACKWARD_QUERY_LIMIT}")
-                blimit = SLOT_BACKWARD_QUERY_LIMIT
+                logger.info(f"Invalid blimit. Setting blimit to default {DEFAULT_SLOT_BACKWARD_QUERY_LIMIT}")
+                blimit = DEFAULT_SLOT_BACKWARD_QUERY_LIMIT
             try:
                 flimit = int(flimit)
             except (TypeError, ValueError):
-                logger.info(f"Invalid flimit. Setting flimit to default {SLOT_FORWARD_QUERY_LIMIT}")
-                flimit = SLOT_FORWARD_QUERY_LIMIT
+                logger.info(f"Invalid flimit. Setting flimit to default {DEFAULT_SLOT_FORWARD_QUERY_LIMIT}")
+                flimit = DEFAULT_SLOT_FORWARD_QUERY_LIMIT
             slots = Slot.objects.filter(
                 Q(school=current_user.school) &
                 Q(start_time__gte=timezone.now()-timedelta(days=blimit)) &
