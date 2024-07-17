@@ -49,11 +49,16 @@ class VehicleView(APIView):
     @swagger_auto_schema(request_body=VehicleSerializer)
     def post(self, request):
         serializer = VehicleSerializer(data=request.data)
-        if serializer.is_valid():            
-            image_file = serializer.validated_data.pop('image', None)
+        image_data = request.FILES.get("image", None)
+        if serializer.is_valid():
             image_url = ""
-            if image_file is not None:
-                image_url = FirebaseUploadImage.upload_image(image_file, 'vehicles')
+            if image_data is not None:
+                image_serializer = ImageUploadSerializer(data=request.FILES)
+                if image_serializer.is_valid():
+                    image_file = image_serializer.validated_data.get('image')
+                    image_url = FirebaseUploadImage.upload_image(image_file, 'vehicles')
+                else:
+                    return Response(image_serializer.errors, status=400)
             vehicle = serializer.save(
                 image_url=image_url, 
                 school=request.user.school

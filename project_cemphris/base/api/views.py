@@ -156,12 +156,20 @@ def create_school(request):
         return Response({"message": "School already created"}, 200)
     if current_user.role == RoleChoices.SCHOOL:
         serializer = SchoolSerializer(data=request.data)
+        image_data = request.FILES.get("image", None)
         if serializer.is_valid():
-            image_file = serializer.validated_data.pop('image', None)
             image_url = ""
-            if image_file is not None:
-                image_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
-            school = serializer.save(user=current_user, image_url=image_url)            
+            if image_data is not None:
+                image_serializer = ImageUploadSerializer(data=request.FILES)
+                if image_serializer.is_valid():
+                    image_file = image_serializer.validated_data.get('image')
+                    image_url = FirebaseUploadImage.upload_image(image_file, 'profiles')                    
+                else:
+                    return Response(image_serializer.errors, status=400)            
+            school = serializer.save(
+                user=current_user, 
+                image_url=image_url
+            )
             return Response({
                 'user': SchoolSerializer(school, context={'request': request}).data,
                 'message': 'School created successfully.'
@@ -180,12 +188,20 @@ def create_learner(request):
     current_user = request.user
     if current_user.role == RoleChoices.LEARNER:
         serializer = LearnerSerializer(data=request.data)
+        image_data = request.FILES.get("image", None)
         if serializer.is_valid():
-            image_file = serializer.validated_data.pop('image', None)
             image_url = ""
-            if image_file is not None:
-                image_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
-            learner = serializer.save(user=request.user, image_url=image_url)
+            if image_data is not None:   
+                image_serializer = ImageUploadSerializer(data=request.FILES)
+                if image_serializer.is_valid():
+                    image_file = image_serializer.validated_data.get('image')         
+                    image_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+                else:
+                    return Response(image_serializer.errors, status=400)
+            learner = serializer.save(
+                user=request.user, 
+                image_url=image_url
+                )
             return Response({
                 'user': LearnerSerializer(learner, context={'request': request}).data,
                 'message': 'Learner created successfully.'
@@ -260,14 +276,22 @@ def get_user_details(request):
 @permission_classes([BlockSchoolPermission])
 def upload_license(request):
     current_user = request.user
-    serializer = LicenseInformationSerializer(data=request.data)    
+    serializer = LicenseInformationSerializer(data=request.data)
+    image_data = request.FILES.get("image", None)    
     if serializer.is_valid():        
-        image_file = serializer.validated_data.pop('image', None)
         image_url = ""
-        if image_file is not None:
-            image_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
-        license = serializer.save(image_url=image_url, user=current_user)
-        return Response({'message': 'License uploaded successfully', 'image_url': image_url}, status=201)
+        if image_data is not None:
+            image_serializer = ImageUploadSerializer(data=request.FILES)
+            if image_serializer.is_valid():
+                image_file = image_serializer.validated_data.get('image')
+                image_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
+            else:
+                return Response(image_serializer.errors, status=400)
+        license = serializer.save(
+            image_url=image_url, 
+            user=current_user
+            )
+        return Response({'message': 'License uploaded successfully', 'image_url': image_url, 'license_id': license.pk}, status=201)
     else:
         return Response(serializer.errors, status=400)
     
@@ -306,11 +330,16 @@ class InstructorView(APIView):
     def post(self, request):
         current_user = request.user
         serializer = InstructorSerializer(data=request.data)
+        image_data = request.FILES.get("image", None)
         if serializer.is_valid():
-            image_file = serializer.validated_data.pop('image', None)
             image_url = ""
-            if image_file is not None:
-                image_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+            if image_data is not None:
+                image_serializer = ImageUploadSerializer(data=request.FILES)
+                if image_serializer.is_valid():
+                    image_file = image_serializer.validated_data.get('image')
+                    image_url = FirebaseUploadImage.upload_image(image_file, 'profiles')
+                else:
+                    return Response(image_serializer.errors, status=400)
             random_password = get_random_string(length=12)
             instructor = serializer.save(is_active=False, password=random_password, school=current_user.school, image_url=image_url)
             send_activation_mail(request, instructor.user)
