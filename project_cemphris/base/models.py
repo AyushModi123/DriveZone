@@ -150,7 +150,8 @@ class Instructor(models.Model):
     
 class School(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='school')
-    name = models.CharField(max_length=500, blank=False, null=False)    
+    name = models.CharField(max_length=500, blank=False, null=False)
+    desc = models.TextField(blank=True, null=False, default="")
     location = models.CharField(max_length=2000, null=True, blank=True)
     image_url = models.URLField(null=False, blank=True, default='')
     mobile_number = models.CharField(max_length=20, null=True, blank=False)

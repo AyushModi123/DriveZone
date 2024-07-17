@@ -76,7 +76,7 @@ class SchoolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = School
-        fields = ['name', 'location', 'mobile_number', 'preferred_language']
+        fields = ['name', 'location', 'mobile_number', 'preferred_language', 'desc']
     
     def create(self, validated_data):        
         user = validated_data.pop('user')
@@ -88,7 +88,7 @@ class OutSchoolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = School
-        fields = ['id', 'user', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language']
+        fields = ['id', 'user', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'desc']
 
 class OutVeryShortSchoolSerializer(serializers.ModelSerializer):
 
@@ -100,7 +100,7 @@ class OutShortSchoolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = School
-        fields = ['id', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language']
+        fields = ['id', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'desc']
 
 
 class OutInstructorSerializer(serializers.ModelSerializer):
