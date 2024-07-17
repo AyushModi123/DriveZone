@@ -1,5 +1,5 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-from django.template import Context, Template
+from channels.exceptions import DenyConnection
 import json
 import logging 
 from .models import Notification
@@ -10,11 +10,16 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     
     async def connect(self):
         self.user = self.scope["user"]
-        await self.channel_layer.group_add(f"notification_{self.user.id}", self.channel_name)
-        await self.accept()
+        if self.user.is_authenticated:
+            await self.channel_layer.group_add(f"notification_{self.user.id}", self.channel_name)
+            await self.accept()
+        else:
+            raise DenyConnection()
     
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(f"notification_{self.user.id}", self.channel_name)
+        if self.user.is_authenticated:
+            await self.channel_layer.group_discard(f"notification_{self.user.id}", self.channel_name)        
+            await self.close(200, "Closed on request")
         
     async def receive(self, text_data):
         try:
