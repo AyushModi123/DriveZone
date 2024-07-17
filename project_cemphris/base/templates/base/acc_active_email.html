@@ -3,7 +3,6 @@ Hi {{ user.username }},
 
 Please click the link below to activate your account:
 
-<!-- http://{{ domain }}{% url 'activate_account' uidb64=uid token=token %} -->
 https://drivezone.vercel.app/account-activate/{{ uid }}/{{ token }}
 
 {% endautoescape %}

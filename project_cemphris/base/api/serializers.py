@@ -22,6 +22,9 @@ class ImageUploadSerializer(serializers.Serializer):
             raise serializers.ValidationError(f"File size exceeds the maximum limit of {settings.MAX_IMAGE_FILE_SIZE / (1024 * 1024)} MB.")
         return value
 
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
@@ -51,11 +54,6 @@ class OutUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'role', 'profile_completion_level', 'is_active')
-
-class EmailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('email',)
 
 class ResetPasswordSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
