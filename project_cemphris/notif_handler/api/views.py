@@ -13,5 +13,5 @@ from .serializers import OutNotificationSerializer
 def get_notifications(request):
     current_user = request.user    
     notifications = Notification.objects.filter(user=current_user).order_by('-created_at')[:RETURN_NOTIFICATION_COUNT]
-    return Response({"notifications": OutNotificationSerializer(notifications).data}, status=200)
+    return Response({"notifications": OutNotificationSerializer(notifications, many=True).data}, status=200)
         

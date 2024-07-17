@@ -11,6 +11,6 @@ def enroll_course(sender, instance, created, **kwargs):
             learner_course = EnrollCourse.objects.create(
                 learner=instance.learner,
                 course=instance.course,
-                payment=instance.pk
+                payment=instance
             )
             learner_course.save()
