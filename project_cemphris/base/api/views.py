@@ -137,7 +137,7 @@ def resend_activation_mail(request):
             user = User.objects.get(email=email)
             if user.is_active:
                 return Response({"message": "User already activated"}, status=200)
-            act_hist = ActivationMailHistory.objects.get_or_create(email=email)
+            act_hist, _ = ActivationMailHistory.objects.get_or_create(email=email)
             if act_hist.sent_count >= MAX_ACTIVATION_MAIL_SENT_COUNT:
                 return Response({
                     'message': 'Max Retries Reached'
