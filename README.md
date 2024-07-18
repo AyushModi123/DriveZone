@@ -11,6 +11,7 @@
 # TODO
 
 - Test Slots api celery setup
+- Nginx activation_limit not working
 
 
 # ER Diagram

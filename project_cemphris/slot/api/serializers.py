@@ -11,3 +11,8 @@ class OutSlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slot
         fields = ('instructor', 'start_time', 'duration', 'is_booked', 'learner')
+
+class OutShortSlotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Slot
+        fields = ('instructor', 'start_time', 'duration', 'is_booked')
