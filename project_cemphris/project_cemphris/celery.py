@@ -13,3 +13,6 @@ app = Celery('project_cemphris', broker=settings.CELERY_BROKER_URL)
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.autodiscover_tasks()
+
+app.control.rate_limit('notif_handler.tasks.send_email', '1/m')
+app.control.rate_limit('notif_handler.tasks.send_scheduled_emails', '1/m')

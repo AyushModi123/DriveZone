@@ -32,20 +32,21 @@ class SlotView(APIView):
     @method_decorator(vary_on_headers("Authorization"))
     def get(self, request):
         current_user = request.user
+        blimit = request.GET.get("blimit", DEFAULT_SLOT_BACKWARD_QUERY_LIMIT)
+        flimit = request.GET.get("flimit", DEFAULT_SLOT_FORWARD_QUERY_LIMIT)
+        try:
+            blimit = int(blimit)                
+        except (TypeError, ValueError):
+            logger.info(f"Invalid blimit. Setting blimit to default {DEFAULT_SLOT_BACKWARD_QUERY_LIMIT}")
+            blimit = DEFAULT_SLOT_BACKWARD_QUERY_LIMIT
+        try:
+            flimit = int(flimit)
+        except (TypeError, ValueError):
+            logger.info(f"Invalid flimit. Setting flimit to default {DEFAULT_SLOT_FORWARD_QUERY_LIMIT}")
+            flimit = DEFAULT_SLOT_FORWARD_QUERY_LIMIT
+
         if current_user.is_school:
             q = request.GET.get("q", "")
-            blimit = request.GET.get("blimit", DEFAULT_SLOT_BACKWARD_QUERY_LIMIT)
-            flimit = request.GET.get("flimit", DEFAULT_SLOT_FORWARD_QUERY_LIMIT)
-            try:
-                blimit = int(blimit)                
-            except (TypeError, ValueError):
-                logger.info(f"Invalid blimit. Setting blimit to default {DEFAULT_SLOT_BACKWARD_QUERY_LIMIT}")
-                blimit = DEFAULT_SLOT_BACKWARD_QUERY_LIMIT
-            try:
-                flimit = int(flimit)
-            except (TypeError, ValueError):
-                logger.info(f"Invalid flimit. Setting flimit to default {DEFAULT_SLOT_FORWARD_QUERY_LIMIT}")
-                flimit = DEFAULT_SLOT_FORWARD_QUERY_LIMIT
             slots = Slot.objects.filter(
                 Q(school=current_user.school) &
                 Q(start_time__gte=timezone.now()-timedelta(days=blimit)) &
@@ -57,7 +58,9 @@ class SlotView(APIView):
             return Response({'slots': OutSlotSerializer(slots, many=True).data}, status=200)
         elif current_user.is_instructor:
             slots = Slot.objects.filter(
-                instructor=current_user.instructor
+                Q(instructor=current_user.instructor) &
+                Q(start_time__gte=timezone.now()-timedelta(days=blimit)) &
+                Q(start_time__lte=timezone.now()+timedelta(days=flimit))
             )
             return Response({'slots': OutSlotSerializer(slots, many=True).data}, status=200)
         else:

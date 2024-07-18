@@ -200,4 +200,9 @@ class LicenseInformation(models.Model):
     def __str__(self):
         return self.number
 
-#plans
+class ActivationMailHistory(models.Model):
+    email = models.EmailField(unique=True, null=False, blank=False, db_index=True)
+    sent_count = models.SmallIntegerField(default=0, null=False, blank=False)
+
+    def __str__(self):
+        return f"{self.email} -> {self.sent_count}"

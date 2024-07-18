@@ -20,12 +20,13 @@ from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, password_reset_token_manager, send_activation_mail, \
     send_instructor_login_details, send_password_reset_email
 
+from base.constants import MAX_ACTIVATION_MAIL_SENT_COUNT
 from base.choices import RoleChoices
 from .serializers import LearnerSerializer, SchoolSerializer, OutLearnerSerializer, OutSchoolSerializer,\
       OutInstructorSerializer, UserSerializer, OutUserSerializer, LicenseInformationSerializer, \
       OutShortInstructorSerializer, InstructorSerializer, OutShortSchoolSerializer, OutVeryShortSchoolSerializer, \
       EmailSerializer, ResetPasswordSerializer, ImageUploadSerializer
-from base.models import Instructor, School, Learner, ProfileCompletionLevelChoices
+from base.models import Instructor, School, Learner, ProfileCompletionLevelChoices, ActivationMailHistory
 
 logger = logging.getLogger(__file__)
 
@@ -136,7 +137,14 @@ def resend_activation_mail(request):
             user = User.objects.get(email=email)
             if user.is_active:
                 return Response({"message": "User already activated"}, status=200)
+            act_hist = ActivationMailHistory.objects.get_or_create(email=email)
+            if act_hist.sent_count >= MAX_ACTIVATION_MAIL_SENT_COUNT:
+                return Response({
+                    'message': 'Max Retries Reached'
+                }, status=403)
             send_activation_mail(request, user)
+            act_hist.sent_count+=1
+            act_hist.save()
         except User.DoesNotExist as e:
             logger.exception(e)
         return Response({                
