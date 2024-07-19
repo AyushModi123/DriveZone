@@ -13,12 +13,12 @@ from datetime import timedelta
 from pathlib import Path
 import dj_database_url
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(os.path.join(BASE_DIR, '.env'))
+# load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -142,7 +142,7 @@ ASGI_APPLICATION = 'project_cemphris.asgi.application'
 
 DATABASES = {
     'default':
-        dj_database_url.config(default='postgres://avnadmin:AVNS_ho6eX4d4xiBo-6rrtEg@pg-16b2c8b5-ayush-67e7.d.aivencloud.com:11755/defaultdb?sslmode=require')
+        dj_database_url.config() # DATABASE_URL env 
 }
 
 

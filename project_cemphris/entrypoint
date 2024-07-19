@@ -13,14 +13,10 @@ import sys
 
 import psycopg2
 
+print("entrypoint::", '$DATABASE_URL')
 try:
     psycopg2.connect(
-        dbname="defaultdb",
-        user="avnadmin",
-        password="AVNS_ho6eX4d4xiBo-6rrtEg",
-        host="pg-16b2c8b5-ayush-67e7.d.aivencloud.com",
-        port="11755",
-        sslmode="require",
+        '$DATABASE_URL'
     )
 except psycopg2.OperationalError:
     sys.exit(-1)
