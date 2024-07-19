@@ -12,9 +12,9 @@ from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from datetime import timedelta
 from celery.result import AsyncResult
-from slot.constants import DEFAULT_SLOT_BACKWARD_QUERY_LIMIT, DEFAULT_SLOT_FORWARD_QUERY_LIMIT, DEFAULT_SLOT_FORWARD_LEARNER_QUERY_LIMIT
+from slot.constants import DEFAULT_SLOT_BACKWARD_QUERY_LIMIT, DEFAULT_SLOT_FORWARD_QUERY_LIMIT, DEFAULT_SLOT_FORWARD_LEARNER_QUERY_LIMIT, DEFAULT_SLOT_BACKWARD_LEARNER_QUERY_LIMIT
 from project_cemphris.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockLearnerPermission
-from base.models import Instructor
+from base.models import Instructor, School
 from slot.models import Slot
 from course.models import EnrollCourse
 from .serializers import SlotSerializer, OutSlotSerializer, OutShortSlotSerializer
@@ -74,7 +74,11 @@ class SlotView(APIView):
         current_user = request.user
         serializer = SlotSerializer(data=request.data)
         if serializer.is_valid():
-            slot = serializer.save()
+            instructor = serializer.validated_data.get('instructor')
+            inst_exists = current_user.school.instructors.filter(id=instructor.id).exists()
+            if not inst_exists:
+                return Response({"error": "Invalid Request"}, status=400)
+            slot = serializer.save(school=current_user.school)
             return Response({'message': 'Slot created', 'slot_id': slot.id}, status=201)
         else:
             return Response(serializer.errors, status=400)
@@ -98,7 +102,7 @@ def get_available_instructor_slots(request, inst_id: int):
 
     enrollment_exists = EnrollCourse.objects.filter(
             instructor=instructor,
-            learner=current_user
+            learner=current_user.learner
             ).exists()
     if not enrollment_exists:
         logger.info(f"Instructor with queried learner not found")
@@ -113,37 +117,42 @@ def get_available_instructor_slots(request, inst_id: int):
     return Response({'slots': OutShortSlotSerializer(slots, many=True).data}, status=200)
 
 @swagger_auto_schema(
+    method='GET',
+)
+@api_view(['GET'])
+@permission_classes([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=100)])
+def get_booked_slots(request):
+    current_user = request.user
+    slots = Slot.objects.filter(
+        Q(learner=current_user.learner) &
+        Q(is_booked=True) &
+        Q(start_time__lte=timezone.now()+timedelta(days=DEFAULT_SLOT_FORWARD_LEARNER_QUERY_LIMIT)) &
+        Q(start_time__gte=timezone.now()-timedelta(days=DEFAULT_SLOT_BACKWARD_LEARNER_QUERY_LIMIT))
+    )
+    return Response({'slots': OutShortSlotSerializer(slots, many=True).data}, status=200)
+
+@swagger_auto_schema(
     method='POST',
+    request_body={}
 )
 @api_view(['POST'])
 @transaction.atomic
 @permission_classes([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=100)])
 def book_slot(request, slot_id):
     current_user = request.user
-
-    slot_exists = Slot.objects.filter(
-        pk=slot_id,
-        is_booked=False,
-    ).exists()
-    if not slot_exists:
-        logger.info(f"Slot doesn't exists")
-        return Response({"error": "Not Found"}, status=404) 
-    
-    enrollment_exists = EnrollCourse.objects.filter(
-            instructor=slot.instructor,
-            learner=current_user.learner
-            ).exists()
-    if not enrollment_exists:
-        logger.info(f"Instructor with queried learner not found")
-        return Response({"error": "Not Found"}, status=404)    
-
-    # BOOKING
+         
     try:
         with transaction.atomic():
             slot = Slot.objects.select_for_update().get(
                 pk=slot_id,
                 is_booked=False,
             )
+            enrollment_exists = EnrollCourse.objects.filter(
+                    instructor=slot.instructor,
+                    learner=current_user.learner
+                    ).exists()
+            if not enrollment_exists:                
+                raise EnrollCourse.EnrollmentNotFound
             if not slot.is_booked:
                 slot.learner = current_user.learner
                 slot.is_booked = True
@@ -153,6 +162,9 @@ def book_slot(request, slot_id):
     except Slot.DoesNotExist as e:
         logger.exception(e)
         return Response({"error": "Not Found"}, status=404)
+    except EnrollCourse.EnrollmentNotFound as e:
+        logger.info(f"Instructor with queried learner not found")
+        return Response({"error": "Enrollment Not Found"}, status=404)
     except OperationalError as e:
         logger.exception(e)
         return Response({"error": "Slot Already Booked"}, status=404)

@@ -9,6 +9,7 @@ from .validators import validate_start_time
 # Pessimistic concurrency control and Optimistic concurrency control
 class Slot(models.Model):    
 
+    school = models.ForeignKey("base.School", on_delete=models.CASCADE, related_name="slots", null=True, blank=False)
     learner = models.ForeignKey("base.Learner", on_delete=models.CASCADE, related_name="slots", null=True, blank=False)
     instructor = models.ForeignKey("base.Instructor", on_delete=models.CASCADE, related_name="teaching_slots")
     start_time = models.DateTimeField(null=False, blank=False, validators=[validate_start_time])

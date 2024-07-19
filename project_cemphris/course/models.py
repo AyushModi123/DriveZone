@@ -21,3 +21,6 @@ class EnrollCourse(models.Model):
             return bool(self.instructor)
         except ObjectDoesNotExist:
             return False
+    
+    class EnrollmentNotFound(Exception):
+        pass

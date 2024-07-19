@@ -8,6 +8,7 @@ alias drmi="docker image remove"
 alias dapp="docker compose exec -it pc_app bash"
 alias dpush="docker push ayushmodi/project-cemphris:v0"
 alias dpull="docker pull ayushmodi/project-cemphris:v0"
+# docker images | awk '$1 == "<none>" {print $3}' | xargs -r docker rmi
 # Server
 alias rsa="gunicorn --bind 0.0.0.0:8000 project_cemphris.asgi:application -k uvicorn.workers.UvicornWorker"
 alias pmrs="python manage.py runserver"
