@@ -13,7 +13,6 @@ import sys
 
 import psycopg2
 
-print("entrypoint::", '$DATABASE_URL')
 try:
     psycopg2.connect(
         '$DATABASE_URL'
