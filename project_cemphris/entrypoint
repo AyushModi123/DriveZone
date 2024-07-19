@@ -15,12 +15,11 @@ import psycopg2
 
 try:
     psycopg2.connect(
-        dbname="defaultdb",
-        user="avnadmin",
-        password="AVNS_ho6eX4d4xiBo-6rrtEg",
-        host="pg-16b2c8b5-ayush-67e7.d.aivencloud.com",
-        port="11755",
-        sslmode="require",
+        dbname="project_cemphris",
+        user="postgres",
+        password="qweasd123",
+        host="pc_db",
+        port="5432"
     )
 except psycopg2.OperationalError:
     sys.exit(-1)

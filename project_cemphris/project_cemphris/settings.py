@@ -142,7 +142,7 @@ ASGI_APPLICATION = 'project_cemphris.asgi.application'
 
 DATABASES = {
     'default':
-        dj_database_url.config(default='postgres://avnadmin:AVNS_ho6eX4d4xiBo-6rrtEg@pg-16b2c8b5-ayush-67e7.d.aivencloud.com:11755/defaultdb?sslmode=require')
+        dj_database_url.config(default='postgres://postgres:qweasd123@pc_db:5432/project_cemphris')
 }
 
 
