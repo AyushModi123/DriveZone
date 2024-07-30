@@ -16,7 +16,7 @@ class IsNotAuthenticated(IsAuthenticated):
             return False
         return True
     
-class IsSchoolPermission(IsAuthenticated, IsActivePermission):
+class IsSchoolPermission(IsAuthenticated):
     """
     Allows access only to  authenticated, active schools.
     """
@@ -25,7 +25,7 @@ class IsSchoolPermission(IsAuthenticated, IsActivePermission):
             return request.user.is_school
         return False
 
-class IsLearnerPermission(IsAuthenticated, IsActivePermission):
+class IsLearnerPermission(IsAuthenticated):
     """
     Allows access only to  authenticated, active learner.
     """
@@ -34,25 +34,25 @@ class IsLearnerPermission(IsAuthenticated, IsActivePermission):
             return request.user.is_learner
         return False
     
-class BlockInstructorPermission(IsAuthenticated, IsActivePermission):
+class BlockInstructorPermission(IsAuthenticated):
     def has_permission(self, request, view):
         if super().has_permission(request, view):
             return not request.user.is_instructor
         return False
 
-class BlockSchoolPermission(IsAuthenticated, IsActivePermission):
+class BlockSchoolPermission(IsAuthenticated):
     def has_permission(self, request, view):
         if super().has_permission(request, view):
             return not request.user.is_school
         return False
     
-class BlockLearnerPermission(IsAuthenticated, IsActivePermission):
+class BlockLearnerPermission(IsAuthenticated):
     def has_permission(self, request, view):
         if super().has_permission(request, view):
             return not request.user.is_learner
         return False
 
-class RequiredProfileCompletionPermission(IsAuthenticated, IsActivePermission):
+class RequiredProfileCompletionPermission(IsAuthenticated):
     """
     Allows access only to authenticated, active users with the required profile completion level.
     """
