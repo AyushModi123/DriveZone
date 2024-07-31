@@ -31,8 +31,6 @@ class SlotView(APIView):
             permission_classes+=[IsSchoolPermission]
         return [permission() for permission in permission_classes]
 
-    @method_decorator(cache_page(settings.CACHE_TTL))
-    @method_decorator(vary_on_headers("Authorization"))
     def get(self, request):
         current_user = request.user
         blimit = request.GET.get("blimit", DEFAULT_SLOT_BACKWARD_QUERY_LIMIT)
