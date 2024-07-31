@@ -1,0 +1,301 @@
+[
+{
+  "model": "base.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$SlWP8XuubOG7Xkzb4XKbC1$zHvvTMT55BCD1/f9L43SiMmHy2mb29WZr2ujeI2tD8Q=",
+    "last_login": "2024-07-28T19:34:10.173Z",
+    "is_superuser": true,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2024-07-04T16:03:15.800Z",
+    "username": "Ayush",
+    "profile_completion_level": 10,
+    "email": "ayushonweb785@gmail.com",
+    "role": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "base.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$AhvBhWjPxQcmjkuts6YIX2$hOIbieqSmp42bPkah0zgV9PninBkhhm145eiDUkHAro=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2024-07-09T10:20:59.631Z",
+    "username": "",
+    "profile_completion_level": 100,
+    "email": "shrivatskrishna25@gmail.com",
+    "role": "school",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "base.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$ErVHA7aeO8DT5CZNouplpb$zIKdMVCUdFpWjW0JyCWGV6oZEPPHkfuyWepNMtaFCWI=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": false,
+    "date_joined": "2024-07-13T20:01:33.265Z",
+    "username": "",
+    "profile_completion_level": 75,
+    "email": "sam@gmail.com",
+    "role": "instructor",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "base.user",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$4ILJD1os9psdmVBtgZzTLx$/t2t/sjUSr8Tb4pbqlPxOEyfqziRIS/pQccfnab0eFI=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": false,
+    "date_joined": "2024-07-13T20:06:19.546Z",
+    "username": "",
+    "profile_completion_level": 75,
+    "email": "william@winbook.com",
+    "role": "instructor",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "base.user",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$OCbhQROhd7cijtUSeRA5MR$LJeX/hIjugcW61PfEJWtCWM8ry3Ez+NmnZaY6D+WUeg=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": false,
+    "date_joined": "2024-07-13T20:09:14.620Z",
+    "username": "",
+    "profile_completion_level": 75,
+    "email": "harry@gmail.com",
+    "role": "instructor",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "base.user",
+  "pk": 7,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$7LuDbAeXJHrV3iX9wWUPZY$l1fTRXdkALEUANIJTgscgkvzdN3Z9I6RSdg9j41NIrA=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": false,
+    "date_joined": "2024-07-13T20:10:17.158Z",
+    "username": "",
+    "profile_completion_level": 75,
+    "email": "john@organicfood.com",
+    "role": "instructor",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "base.user",
+  "pk": 11,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$sRlq9YRTvOfjIwPqBvtCfJ$kwKLZdmikxbFsLND5yuvkKN+7U00B78E6FszPuClrLI=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2024-07-17T09:42:29Z",
+    "username": "",
+    "profile_completion_level": 100,
+    "email": "ayush.onlinebusiness@gmail.com",
+    "role": "learner",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "base.user",
+  "pk": 12,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$C9Pg7zwv93m3gsquOaHBOK$ydk2gE+cmdA1V9hRDRzUBcwcIyeyFX0Fu3jWtlaTE1k=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2024-07-28T19:27:45Z",
+    "username": "",
+    "profile_completion_level": 66,
+    "email": "moonpie@gmail.com",
+    "role": "learner",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "base.learner",
+  "pk": 1,
+  "fields": {
+    "user": 11,
+    "full_name": "Ayush Modi",
+    "location": "Pune",
+    "image_url": "",
+    "mobile_number": "0000000000",
+    "preferred_language": "English"
+  }
+},
+{
+  "model": "base.learner",
+  "pk": 2,
+  "fields": {
+    "user": 12,
+    "full_name": "Moon Pie",
+    "location": "Medford, Texas, US",
+    "image_url": "",
+    "mobile_number": "2108378787",
+    "preferred_language": "English"
+  }
+},
+{
+  "model": "base.instructor",
+  "pk": 1,
+  "fields": {
+    "user": 3,
+    "school": 1,
+    "full_name": "Sam Huddleman",
+    "location": "Norway",
+    "image_url": "",
+    "mobile_number": "4904989842",
+    "preferred_language": "English",
+    "experience": 7,
+    "area_of_expertise": "car"
+  }
+},
+{
+  "model": "base.instructor",
+  "pk": 2,
+  "fields": {
+    "user": 4,
+    "school": 1,
+    "full_name": "William Linn",
+    "location": "Australia",
+    "image_url": "",
+    "mobile_number": "896489328",
+    "preferred_language": "English",
+    "experience": 4,
+    "area_of_expertise": "motorbike"
+  }
+},
+{
+  "model": "base.instructor",
+  "pk": 3,
+  "fields": {
+    "user": 5,
+    "school": 1,
+    "full_name": "Harry Brecker",
+    "location": "United Kingdom",
+    "image_url": "",
+    "mobile_number": "57697597",
+    "preferred_language": "English",
+    "experience": 9,
+    "area_of_expertise": "truck"
+  }
+},
+{
+  "model": "base.instructor",
+  "pk": 4,
+  "fields": {
+    "user": 7,
+    "school": 1,
+    "full_name": "John Quick",
+    "location": "United Kingdom",
+    "image_url": "",
+    "mobile_number": "57697597",
+    "preferred_language": "English",
+    "experience": 9,
+    "area_of_expertise": "car"
+  }
+},
+{
+  "model": "base.school",
+  "pk": 1,
+  "fields": {
+    "user": 2,
+    "name": "To the Moon 🌙",
+    "desc": "Our instructors have 17+ years of experience with both automatic and manual cars, we have determined to be a reliable training system where thousands of students each year achieve their goals in obtaining their driving licenses.",
+    "location": "Jabalpur, Madhya Pradesh, IND",
+    "image_url": "https://storage.googleapis.com/project-cemphris.appspot.com/profiles/powerbi_dashboard.png",
+    "mobile_number": "8989898989",
+    "preferred_language": "English"
+  }
+},
+{
+  "model": "course.course",
+  "pk": 1,
+  "fields": {
+    "school": 1,
+    "course_content": {
+      "price": "1245",
+      "title": "yhrjkwekjhd",
+      "banner": "https://img.freepik.com/free-photo/woman-getting-her-driver-s-licence_23-2149891365.jpg?t=st=1720897098~exp=1720900698~hmac=0a8eef1fb08c6d6376eff061c8a007c6628957ae64c2deeb295b465efd0ab49f&w=1060",
+      "duration": "12 days",
+      "description": "wjkfbjkwbfkqbwkdnkqwn"
+    }
+  }
+},
+{
+  "model": "course.course",
+  "pk": 2,
+  "fields": {
+    "school": 1,
+    "course_content": {
+      "price": "4500",
+      "title": "Learn to drive a manual car ",
+      "banner": "https://img.freepik.com/free-photo/woman-getting-her-driver-s-licence_23-2149891365.jpg?t=st=1720897098~exp=1720900698~hmac=0a8eef1fb08c6d6376eff061c8a007c6628957ae64c2deeb295b465efd0ab49f&w=1060",
+      "duration": "20",
+      "description": "- Learn to drive a manual car in 20 days.\n- 1 hour lesson each day\n- Expert instructors."
+    }
+  }
+},
+{
+  "model": "course.course",
+  "pk": 3,
+  "fields": {
+    "school": 1,
+    "course_content": {
+      "price": "4500",
+      "title": "Learn to drive manual car",
+      "banner": "https://img.freepik.com/free-photo/woman-getting-her-driver-s-licence_23-2149891365.jpg?t=st=1720897098~exp=1720900698~hmac=0a8eef1fb08c6d6376eff061c8a007c6628957ae64c2deeb295b465efd0ab49f&w=1060",
+      "duration": "20 days",
+      "description": "- Learn to drive a manual car in 20 days.\n- 1 hour lesson each day.\n- Expert instructor."
+    }
+  }
+}
+]

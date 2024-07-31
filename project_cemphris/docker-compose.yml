@@ -24,23 +24,24 @@ services:
       - project-cemphris-network
     depends_on:
       - pc_redis
+      - pc_db
     env_file:
       - ./.env    
 
-  # pc_db:
-  #   image: postgres:15.7
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data/
-  #   networks:
-  #     - project-cemphris-network
-  #   environment:
-  #     POSTGRES_DB: project_cemphris
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: qweasd123
-  #   env_file:
-  #     - ./.env
+  pc_db:
+    image: postgres:15.7
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - project-cemphris-network
+    environment:
+      POSTGRES_DB: project_cemphris
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qweasd123
+    env_file:
+      - ./.env
 
   pc_redis:
     image: redis:7-alpine
@@ -68,6 +69,7 @@ services:
       - project-cemphris-network
     depends_on:
       - pc_redis
+      - pc_db
     env_file:
       - ./.env
 
@@ -88,3 +90,7 @@ services:
 networks:
   project-cemphris-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

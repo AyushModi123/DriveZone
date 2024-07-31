@@ -145,6 +145,8 @@ DATABASES = {
         dj_database_url.config() # DATABASE_URL env 
 }
 
+FIXTURE_DIRS = [f'{BASE_DIR}/fixtures']
+
 
 CACHES = {
     "default": {
