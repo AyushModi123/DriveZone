@@ -14,7 +14,7 @@ class ReviewViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         permission_classes = [BlockInstructorPermission, RequiredProfileCompletionPermission(required_level=100)]
-        if self.request.method not in ('list', 'retrieve'):
+        if self.action not in {'list', 'retrieve'}:
             permission_classes+=[IsLearnerPermission]
         return [permission() for permission in permission_classes]
 
