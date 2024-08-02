@@ -155,7 +155,8 @@ class School(models.Model):
     location = models.CharField(max_length=2000, null=True, blank=True)
     image_url = models.URLField(null=False, blank=True, default='')
     mobile_number = models.CharField(max_length=20, null=True, blank=False)
-    preferred_language = models.CharField(null=True, blank=False, default='English')    
+    preferred_language = models.CharField(null=True, blank=False, default='English')
+    subscription = "something"
 
     def __str__(self):
         return self.name

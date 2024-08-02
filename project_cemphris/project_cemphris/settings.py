@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_celery_beat',
     # 'django_extensions', # Enable to generate ER Diag
+    'djstripe'
 ]
 
 
@@ -237,10 +238,17 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
+# Payments
+
 # PAYMENT_VARIANTS = {
 #     'razorpay': ('django_payments_razorpay.RazorPayProvider', {
 #         'public_key': 'RAZORPAY_PUBLIC_KEY',
 #         'secret_key': 'RAZORPAY_SECRET_KEY'})}
+STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_TEST_PUBLIC_KEY")
+STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY")
+STRIPE_LIVE_MODE = os.environ.get("STRIPE_LIVE_MODE", 0) == "1"
+DJSTRIPE_WEBHOOK_SECRET = os.environ.get("DJSTRIPE_WEBHOOK_SECRET")
+DJSTRIPE_FOREIGN_KEY_TO_FIELD="id"
 
 # SWAGGER_SETTINGS = {
 #     'SECURITY_DEFINITIONS': {

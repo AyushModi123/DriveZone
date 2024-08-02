@@ -31,3 +31,9 @@ class RoleChoices(models.TextChoices):
     LEARNER = 'learner', 'Learner'
     INSTRUCTOR = 'instructor', 'Instructor'
     SCHOOL = 'school', 'School'
+
+class PlanChoices:
+    FREE = 'Free_pack'
+    STARTER = 'Starter_pack'
+    PRO = 'Pro_pack'
+    ENTERPRISE = 'Enterprise_pack'

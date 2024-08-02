@@ -24,3 +24,5 @@ uvicorn==0.30.1
 uvicorn[standard]
 # graphviz
 # django-extensions
+stripe==4.2.0
+dj-stripe==2.8.4

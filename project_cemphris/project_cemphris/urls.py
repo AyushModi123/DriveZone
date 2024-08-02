@@ -48,6 +48,7 @@ urlpatterns = [
     path('api/courses/', include('course.api.urls')),
     path('api/payments/', include('payment.api.urls')),
     path('api/notifications/', include('notif_handler.api.urls')),
+    path("stripe/", include("djstripe.urls", namespace="djstripe"))
 ]
 
 #Swagger Docs
