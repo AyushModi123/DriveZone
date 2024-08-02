@@ -13,6 +13,7 @@ from course.models import Course, EnrollCourse
 from .serializers import CourseSerializer, OutCourseSerializer, EnrollCourseSerializer, OutShortEnrollCourseSerializer, OutEnrollCourseSerializer
 from firebase_utils import FirebaseUploadImage
 
+@swagger_auto_schema()
 class CourseViewSet(viewsets.ViewSet):    
 
     def get_permissions(self):
@@ -85,6 +86,10 @@ class CourseViewSet(viewsets.ViewSet):
     #     course.delete(keep_parents=True)
     #     return Response({"message": "Course deleted successfully"}, status=204)
     
+swagger_auto_schema(
+    method='POST',
+    request_body=EnrollCourseSerializer
+)
 @api_view(["POST"])
 @permission_classes([IsSchoolPermission])
 def assign_instructor(request, pk=None):
@@ -106,6 +111,9 @@ def assign_instructor(request, pk=None):
         return Response({"message": "Instructor Assigned Successfully"}, status=200)
     return Response(serializer.errors, status=400)
 
+@swagger_auto_schema(
+        method='GET'
+)
 @api_view(["GET"])
 @permission_classes([BlockInstructorPermission])
 def get_enrollment(request):
