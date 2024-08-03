@@ -13,30 +13,24 @@ logger = logging.getLogger(__file__)
 class ReviewViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
-        permission_classes = [BlockInstructorPermission, RequiredProfileCompletionPermission(required_level=100)]
+        permission_classes = []
         if self.action not in {'list', 'retrieve'}:
-            permission_classes+=[IsLearnerPermission]
+            permission_classes.extend([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=100)])
         return [permission() for permission in permission_classes]
-
-    def list(self, request):
-        current_user = request.user
+    
+    def list(self, request):        
+        school_id = request.GET.get("school_id", None)
         limit = request.GET.get("limit", 10)
         try:
             limit = int(limit)
         except (TypeError, ValueError):
-            return Response({"message": "Invalid limit"}, status=400)
-
-        if current_user.is_school:
-            reviews = Review.objects.filter(school=current_user.school)[:limit]
-            return Response({'reviews': OutReviewSerializer(reviews, many=True).data}, status=200)
-        elif current_user.is_learner:
-            school_id = request.GET.get("school_id", None)
-            try:
-                school_id = int(school_id)
-            except (TypeError, ValueError):
-                return Response({"message": "Invalid school_id"}, status=400)
-            reviews = Review.objects.filter(school=school_id)[:limit]
-            return Response({'reviews': OutReviewSerializer(reviews, many=True).data}, status=200)
+            return Response({"message": "Invalid limit"}, status=400)        
+        try:
+            school_id = int(school_id)
+        except (TypeError, ValueError):
+            return Response({"message": "Invalid school_id"}, status=400)
+        reviews = Review.objects.filter(school=school_id)[:limit]
+        return Response({'reviews': OutReviewSerializer(reviews, many=True).data}, status=200)
         
     @swagger_auto_schema(request_body=ReviewSerializer)
     def create(self, request):
@@ -47,26 +41,24 @@ class ReviewViewSet(viewsets.ViewSet):
             return Response({"message": OutReviewSerializer(review).data}, status=201)
         return Response(serializer.errors, status=400)
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None):                
+        try:                
+            review = Review.objects.get(id=pk)
+            return Response({'review': OutReviewSerializer(review, many=False).data}, status=200)
+        except Review.DoesNotExist as e:
+            logger.exception(e)
+            return Response({"message": "Invalid Review id"}, status=400)
+    
+    def update(self, request, pk=None):
         current_user = request.user
-        school_id = request.GET.get("school_id", None)
-        review_id = pk
+        try:                
+            review = Review.objects.get(id=pk, learner=current_user.learner)            
+        except Review.DoesNotExist as e:
+            logger.exception(e)
+            return Response({"message": "Invalid Review id"}, status=400)
+        serializer = ReviewSerializer(instance=review, data=request.data)
+        if serializer.is_valid():
+            review = serializer.save()
+            return Response(status=204)
+        return Response(serializer.errors, status=400)
 
-        if current_user.is_school:                        
-                try:
-                    review = Review.objects.get(school=current_user.school, id=review_id)
-                    return Response({'review': OutReviewSerializer(review, many=False).data}, status=200)
-                except Review.DoesNotExist as e:
-                    logger.info("Invalid Review id")
-                    return Response({"message": "Invalid Review id"}, status=400)
-        elif current_user.is_learner:
-            try:
-                school_id = int(school_id)
-            except (TypeError, ValueError):
-                return Response({"message": "Invalid School id"}, status=400)
-            try:                
-                review = Review.objects.get(school=school_id, id=review_id)
-                return Response({'review': OutReviewSerializer(review, many=False).data}, status=200)
-            except Review.DoesNotExist:
-                logger.info("Invalid Review id")
-                return Response({"message": "Invalid Review id"}, status=400)                

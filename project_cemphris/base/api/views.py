@@ -402,6 +402,10 @@ class SchoolViewSet(viewsets.ViewSet):
 @cache_page(settings.CACHE_TTL)
 @vary_on_cookie
 def check_api(request):
+    print('REMOTE_ADDR--', request.META.get('REMOTE_ADDR', None))
+    print('HTTP_X_REAL_IP--', request.META.get('HTTP_X_REAL_IP', None))
+    print('HTTP_X_FORWARDED_FOR--', request.META.get('HTTP_X_FORWARDED_FOR', None))
+    print(request.META)
     return Response("Working")
 # @api_view(['PUT'])
 # def update_details(request):

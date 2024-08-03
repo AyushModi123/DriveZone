@@ -31,8 +31,16 @@ class OutShortEnrollCourseSerializer(serializers.ModelSerializer):
     def get_inst_id(self, obj):
         return obj.instructor.id
 
-class OutEnrollCourseSerializer(serializers.ModelSerializer):
+class OutEnrollCourseSerializer(serializers.ModelSerializer):    
+    inst_name = serializers.SerializerMethodField()
+    learner_name = serializers.SerializerMethodField()
     
     class Meta:
         model = EnrollCourse
-        fields = ('id', 'learner', 'course', 'instructor', 'payment')
+        fields = ('id', 'inst_name', 'learner_name', 'learner', 'course', 'instructor', 'payment')
+    
+    def get_inst_name(self, obj):
+        return obj.instructor.full_name
+
+    def get_learner_name(self, obj):
+        return obj.learner.full_name

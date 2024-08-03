@@ -20,7 +20,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     
     async def disconnect(self, close_code):
         if self.user:
-            await self.channel_layer.group_discard(f"notification_{self.user.id}", self.channel_name)        
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)        
             await self.close(200, "Closed on request")
         
     async def receive(self, text_data):
@@ -33,6 +33,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             token = text_data_json.get("token", None)
             if token:
                 self.user = await self.get_user_from_jwt(token)
+                self.group_name = f"notification_{self.user.id}"
+                await self.channel_layer.group_add(
+                    self.group_name,
+                    self.channel_name
+                )
             else:
                 await self.send(
                 text_data=json.dumps(
@@ -65,20 +70,14 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             )
 
     async def send_notification(self, event):
-        message = event["message"]
-        tag = event["tag"]
-        course_id = event["course_id"]
-        learner_id = event["learner_id"]
-        notif_id = event["notification_id"]
+        # message = event.get("message", None)
+        # tag = event.get("tag", None)
+        # course_id = event.get("course_id", None)
+        # learner_id = event.get("learner_id", None)
+        # notif_id = event.get("notification_id", None)
         await self.send(
             text_data=json.dumps(
-            {               
-                'tag': tag,
-                'course_id': course_id,
-                'learner_id': learner_id,
-                'notification_id': notif_id,
-                "message": message
-            }
+            event
             )
         )
 

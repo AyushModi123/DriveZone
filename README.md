@@ -6,7 +6,7 @@
 # TODO
 
 - Test Slots api celery setup
-
+- Correct profile completion logic
 
 # ER Diagram
 

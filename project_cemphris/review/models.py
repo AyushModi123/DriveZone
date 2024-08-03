@@ -16,3 +16,7 @@ class Review(models.Model):
     def __str__(self):
         return f"{self.school}'s Rating: {self.get_rating_display()}"
 
+    class Meta:        
+        constraints = [
+            models.UniqueConstraint(fields=['school', 'learner'], name='one_learner_review_per_school')
+        ]
