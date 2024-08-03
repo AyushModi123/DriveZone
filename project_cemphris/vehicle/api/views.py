@@ -26,8 +26,7 @@ class VehicleViewSet(viewsets.ViewSet):
             permission_classes.extend([IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)])
         return [permission() for permission in permission_classes]
     
-    @method_decorator(cache_page(settings.CACHE_TTL))
-    @method_decorator(vary_on_headers("Authorization"))
+    @method_decorator(cache_page(settings.CACHE_TTL))    
     @swagger_auto_schema()
     def list(self, request):   
         school_id = request.GET.get("school_id", None) 
@@ -47,7 +46,7 @@ class VehicleViewSet(viewsets.ViewSet):
             Q(school=school) &
             (
                 Q(model__icontains=q) | 
-                Q(license_no__icontains=q) |
+                Q(plate_no__icontains=q) |
                 Q(make__icontains=q) |
                 Q(type__icontains=q)
             )

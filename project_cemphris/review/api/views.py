@@ -2,6 +2,9 @@ import logging
 from rest_framework.response import Response
 # from rest_framework.views import APIView
 from rest_framework import viewsets
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from project_cemphris.permissions import RequiredProfileCompletionPermission, BlockInstructorPermission, IsLearnerPermission
 from .serializers import OutReviewSerializer, ReviewSerializer
@@ -18,6 +21,7 @@ class ReviewViewSet(viewsets.ViewSet):
             permission_classes.extend([IsLearnerPermission, RequiredProfileCompletionPermission(required_level=100)])
         return [permission() for permission in permission_classes]
     
+    @method_decorator(cache_page(settings.CACHE_TTL))
     def list(self, request):        
         school_id = request.GET.get("school_id", None)
         limit = request.GET.get("limit", 10)
