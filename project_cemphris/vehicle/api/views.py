@@ -18,7 +18,7 @@ from firebase_utils import FirebaseUploadImage
 logger = logging.getLogger(__file__)
 
 @swagger_auto_schema()
-class VehicleView(viewsets.ViewSet):    
+class VehicleViewSet(viewsets.ViewSet):    
 
     def get_permissions(self):
         permission_classes = []
