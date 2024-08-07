@@ -311,7 +311,7 @@ def upload_license(request):
         return Response(serializer.errors, status=400)
     
 @swagger_auto_schema()
-class InstructorViewset(viewsets.ViewSet):    
+class InstructorViewSet(viewsets.ViewSet):    
     def get_permissions(self):
         permission_classes = []
         if self.action not in {'list', 'retrieve'}:

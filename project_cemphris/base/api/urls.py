@@ -6,7 +6,7 @@ from . import views
 router = DefaultRouter()
 
 router.register(r'schools', viewset=views.SchoolViewSet, basename="schools")
-
+router.register(r'instructors', viewset=views.InstructorViewSet, basename="instructors")
 
 urlpatterns = [
     path('',  views.check_api),
@@ -18,7 +18,6 @@ urlpatterns = [
     path('create-school/', views.create_school, name='create-school'),
     path('create-learner/', views.create_learner, name='create-learner'),
     path('upload-license/', views.upload_license, name='upload-license'),
-    path('instructors/', views.InstructorView.as_view(), name='instructors'),
     path("password-reset/", views.password_reset, name="password_reset"),
     path(
         "password-reset-confirm/<uidb64>/<token>/", views.PasswordReset.as_view(), 
