@@ -90,19 +90,26 @@ class PasswordReset(APIView):
     request_body=EmailSerializer,    
 )
 @api_view(['POST'])
-@authentication_classes([])
 @permission_classes([])
 def password_reset(request):
-    serializer = EmailSerializer(data=request.data)
-    if serializer.is_valid():
-        email = serializer.validated_data.get("email", None)
-        try:
-            user = User.objects.get(email=email)
-            send_password_reset_email(request, user)
-        except User.DoesNotExist:
-            logger.info("Email not found for password reset request")
-        return Response({'message': 'We have sent password reset link to your email.'}, status=200)
-    return Response(serializer.errors, status=400)
+    if request.user.is_authenticated:
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            request.user.set_password(serializer.validated_data.get('password'))
+            request.user.save()
+            return Response({'message': 'Password updated'}, status=200)
+        return Response(serializer.errors, status=400)
+    else:
+        serializer = EmailSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data.get("email", None)
+            try:
+                user = User.objects.get(email=email)
+                send_password_reset_email(request, user)
+            except User.DoesNotExist:
+                logger.info("Email not found for password reset request")
+            return Response({'message': 'We have sent password reset link to your email.'}, status=200)
+        return Response(serializer.errors, status=400)
 
 
 @swagger_auto_schema(

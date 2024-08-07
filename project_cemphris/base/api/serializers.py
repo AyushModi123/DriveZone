@@ -34,8 +34,9 @@ class UserSerializer(serializers.ModelSerializer):
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Password fields didn't match."})
-        # add instructor validation to not create instructor
+            raise serializers.ValidationError({"password": "Password fields didn't match."})        
+        if attrs['role'] == 'instructor':
+            raise serializers.ValidationError({"role": "Invalid role"})
         return attrs
 
     def create(self, validated_data):
@@ -60,6 +61,11 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('password', 'password2')
+    
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})        
+        return attrs
 
 class LearnerSerializer(serializers.ModelSerializer):        
     class Meta:
