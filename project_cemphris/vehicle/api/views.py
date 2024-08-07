@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from django.conf import settings
 from django.utils.decorators import method_decorator
@@ -26,31 +27,27 @@ class VehicleViewSet(viewsets.ViewSet):
             permission_classes.extend([IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)])
         return [permission() for permission in permission_classes]
     
-    @method_decorator(cache_page(settings.CACHE_TTL))    
+    # @method_decorator(cache_page(settings.CACHE_TTL))    
     @swagger_auto_schema()
     def list(self, request):   
         school_id = request.GET.get("school_id", None) 
         try:
             school_id = int(school_id)
-        except (TypeError, ValueError) as e:
-            logger.exception(e)
-            return Response({"message": "Invalid School id"}, status=400)
-        q = request.GET.get("q", "")
-        try:
             school = School.objects.get(pk=school_id)
-        except School.DoesNotExist as e:
+        except (TypeError, ValueError, School.DoesNotExist) as e:
             logger.exception(e)
-            return Response({"error": "Invalid School Id"}, status=400)
+            return Response({"message": "Invalid School id"}, status=400)        
 
         vehicles = Vehicle.objects.filter(
-            Q(school=school) &
-            (
-                Q(model__icontains=q) | 
-                Q(plate_no__icontains=q) |
-                Q(make__icontains=q) |
-                Q(type__icontains=q)
-            )
+            Q(school=school)            
         )
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(vehicles, request)
+
+        if page is not None:
+            serializer = OutVehicleSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        # If pagination is not applied(for compatibility)
         return Response({'vehicles': OutVehicleSerializer(vehicles, many=True).data}, status=200)
 
     
