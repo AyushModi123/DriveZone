@@ -311,38 +311,44 @@ def upload_license(request):
         return Response(serializer.errors, status=400)
     
 @swagger_auto_schema()
-class InstructorView(APIView):
-    permission_classes = [IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)]
-    @method_decorator(cache_page(settings.CACHE_TTL * 10))
-    @method_decorator(vary_on_headers("Authorization"))
-    def get(self, request):
-        current_user = request.user
-        instructor_id = request.GET.get("id", None)
-        if instructor_id is not None:
-            try:
-                instructor_id = int(instructor_id)
-            except (TypeError, ValueError):
-                return Response({"message": "Invalid Instructor id"}, status=400)
-            try:
-                instructor = Instructor.objects.get(id=instructor_id, school=current_user.school)
-            except Instructor.DoesNotExist:
-                return Response({'error': 'Invalid Instructor ID'}, status=400)
-            return Response({'instructor': OutInstructorSerializer(instructor, many=False).data}, status=200)
-        else:
-            q = request.GET.get("q", "")
-            instructors = Instructor.objects.filter(
-                Q(school=current_user.school) &
-                (
-                    Q(full_name__icontains=q) | 
-                    Q(location__icontains=q) |
-                    Q(experience__iexact=q) |
-                    Q(preferred_language__iexact=q)
-                )
-            )
-            return Response({'instructors': OutShortInstructorSerializer(instructors, many=True).data}, status=200)
+class InstructorViewset(viewsets.ViewSet):    
+    def get_permissions(self):
+        permission_classes = []
+        if self.action not in {'list', 'retrieve'}:
+            permission_classes.extend([IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)])
+        return [permission() for permission in permission_classes]
+    
+    @method_decorator(cache_page(settings.CACHE_TTL))
+    def list(self, request):
+        school_id = request.GET.get("school_id", None)
+        try:
+            school_id = int(school_id)
+            school = School.objects.get(pk=school_id)
+        except (TypeError, ValueError, School.DoesNotExist):
+            logger.info("Invalid School id")
+            return Response({"message": "Invalid School id"}, status=400)        
+        instructors = Instructor.objects.filter(
+            Q(school=school)
+        )
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(instructors, request)
+
+        if page is not None:
+            serializer = OutShortInstructorSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        # If pagination is not applied(for compatibility)
+        return Response({'instructors': OutShortInstructorSerializer(instructors, many=True).data}, status=200)
+
+    @method_decorator(cache_page(settings.CACHE_TTL))
+    def retrieve(self, request, pk=None):
+        try:
+            instructor = Instructor.objects.get(id=pk)
+        except Instructor.DoesNotExist:
+            return Response({'error': 'Invalid Instructor ID'}, status=400)
+        return Response({'instructor': OutInstructorSerializer(instructor, many=False).data}, status=200)
 
     @swagger_auto_schema(request_body=InstructorSerializer)
-    def post(self, request):
+    def create(self, request):
         current_user = request.user
         serializer = InstructorSerializer(data=request.data)
         image_data = request.FILES.get("image", None)
@@ -365,13 +371,22 @@ class InstructorView(APIView):
                 }, status=201)
         return Response(serializer.errors, status=400)
 
+    def update(self, request, pk=None):
+        try:
+            instructor = Instructor.objects.get(id=pk)
+        except Instructor.DoesNotExist:
+            return Response({'error': 'Invalid Instructor ID'}, status=400)
+        serializer = InstructorSerializer(instance=instructor, data=request.data)
+        if serializer.is_valid():
+            instructor = serializer.save()
+            return Response(status=204)
+        return Response(serializer.errors, status=400)
 
 class SchoolViewSet(viewsets.ViewSet):
     permission_classes = []
     authentication_classes = []
 
-    @method_decorator(cache_page(settings.CACHE_TTL * 10))
-    @method_decorator(vary_on_cookie)
+    @method_decorator(cache_page(settings.CACHE_TTL))
     def list(self, request):
         query_location: str = request.GET.get("location", "Pune")
         query_name: str = request.GET.get("name", "")
@@ -391,8 +406,7 @@ class SchoolViewSet(viewsets.ViewSet):
         # If pagination is not applied(for compatibility)
         return Response({'schools': OutVeryShortSchoolSerializer(schools, many=True).data}, status=200)
 
-    @method_decorator(cache_page(settings.CACHE_TTL * 10))
-    @method_decorator(vary_on_cookie)
+    @method_decorator(cache_page(settings.CACHE_TTL))
     def retrieve(self, request, pk=None):
         query_location: str = request.GET.get("location", "Pune")
         try:
@@ -406,8 +420,6 @@ class SchoolViewSet(viewsets.ViewSet):
             return Response({'error': "Invalid School Id"}, status=404)
         return Response({'school': OutShortSchoolSerializer(school, many=False).data}, status=200)
 
-@cache_page(settings.CACHE_TTL)
-@vary_on_cookie
 def check_api(request):
     print('REMOTE_ADDR--', request.META.get('REMOTE_ADDR', None))
     print('HTTP_X_REAL_IP--', request.META.get('HTTP_X_REAL_IP', None))
