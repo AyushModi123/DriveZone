@@ -1,3 +1,4 @@
+import logging
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework import viewsets
@@ -12,6 +13,8 @@ from base.models import User, ProfileCompletionLevelChoices
 from course.models import Course, EnrollCourse
 from .serializers import CourseSerializer, OutCourseSerializer, EnrollCourseSerializer, OutShortEnrollCourseSerializer, OutEnrollCourseSerializer
 from firebase_utils import FirebaseUploadImage
+
+logger = logging.getLogger(__file__)
 
 @swagger_auto_schema()
 class CourseViewSet(viewsets.ViewSet):    

@@ -20,8 +20,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     
     async def disconnect(self, close_code):
         if self.user:
-            await self.channel_layer.group_discard(self.group_name, self.channel_name)        
-            await self.close(200, "Closed on request")
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)                    
         
     async def receive(self, text_data):
         try:
@@ -53,7 +52,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                     read = data.get("read", None)
                     notif_id = data.get("notification_id", None)
                     try:
-                        notif = await Notification.objects.aget(id=notif_id)
+                        notif = await Notification.objects.aget(id=notif_id, user=self.user)
                         notif.read = read
                         await notif.asave()
                     except Notification.DoesNotExist as e:
