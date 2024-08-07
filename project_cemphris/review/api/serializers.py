@@ -5,7 +5,7 @@ class OutReviewSerializer(serializers.ModelSerializer):
     learner_name = serializers.SerializerMethodField()
     class Meta:
         model = Review
-        fields = ('id', 'school', 'rating', 'content', 'learner')
+        fields = ('id', 'school', 'rating', 'content', 'learner', 'learner_name')
 
     def get_rating(self, obj):
         """Called for make serializer field"""
