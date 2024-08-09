@@ -320,13 +320,16 @@ class InstructorViewSet(viewsets.ViewSet):
     
     @method_decorator(cache_page(settings.CACHE_TTL))
     def list(self, request):
-        school_id = request.GET.get("school_id", None)
-        try:
-            school_id = int(school_id)
-            school = School.objects.get(pk=school_id)
-        except (TypeError, ValueError, School.DoesNotExist):
-            logger.info("Invalid School id")
-            return Response({"message": "Invalid School id"}, status=400)        
+        if request.user.is_authenticated and request.user.is_school:
+            school = request.user.school
+        else:
+            school_id = request.GET.get("school_id", None)
+            try:
+                school_id = int(school_id)
+                school = School.objects.get(pk=school_id)
+            except (TypeError, ValueError, School.DoesNotExist):
+                logger.info("Invalid School id")
+                return Response({"message": "Invalid School id"}, status=400)        
         instructors = Instructor.objects.filter(
             Q(school=school)
         )

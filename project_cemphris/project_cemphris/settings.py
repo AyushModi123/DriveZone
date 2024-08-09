@@ -93,7 +93,7 @@ ALLOWED_IMAGE_EXTENSIONS = [
     'webp',
     'jfif',
 ]
-MAX_IMAGE_FILE_SIZE = 1024 * 1024  # Bytes
+MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024  # Bytes
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
