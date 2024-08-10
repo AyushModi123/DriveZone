@@ -18,7 +18,7 @@ from base.permissions import RequiredProfileCompletionPermission, IsSchoolPermis
     BlockSchoolPermission, IsNotAuthenticated, IsLearnerPermission
 from firebase_utils import FirebaseUploadImage
 from base.utils import activation_token_manager, password_reset_token_manager, send_activation_mail, \
-    send_instructor_login_details, send_password_reset_email
+    send_instructor_login_details, send_reset_password_email, send_password_reset_email
 
 from base.constants import MAX_ACTIVATION_MAIL_SENT_COUNT
 from base.choices import RoleChoices
@@ -97,6 +97,7 @@ def password_reset(request):
         if serializer.is_valid():
             request.user.set_password(serializer.validated_data.get('password'))
             request.user.save()
+            send_password_reset_email(request, user)
             return Response({'message': 'Password updated'}, status=200)
         return Response(serializer.errors, status=400)
     else:
@@ -105,7 +106,7 @@ def password_reset(request):
             email = serializer.validated_data.get("email", None)
             try:
                 user = User.objects.get(email=email)
-                send_password_reset_email(request, user)
+                send_reset_password_email(request, user)
             except User.DoesNotExist:
                 logger.info("Email not found for password reset request")
             return Response({'message': 'We have sent password reset link to your email.'}, status=200)

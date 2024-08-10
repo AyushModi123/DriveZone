@@ -1,8 +1,8 @@
 {% autoescape off %}
-Hi {{ user.username }},
+Hi,
 
 Please click the link below to activate your account:
 
-https://drivezone.vercel.app/account-activate/{{ uid }}/{{ token }}
+{{domain}}/account-activate/{{ uid }}/{{ token }}
 
 {% endautoescape %}
