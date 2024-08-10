@@ -75,6 +75,7 @@ def send_notification_signal(sender, instance, created, **kwargs):
 @receiver(post_save, sender=EnrollCourse)
 def instructor_assigned(sender, instance, created, **kwargs):    
     if instance.is_instructor_assigned:
+        # For Learner
         learner = instance.learner
         course = instance.course
         instructor = instance.instructor        
@@ -93,12 +94,7 @@ def instructor_assigned(sender, instance, created, **kwargs):
             'message': message
         }
         send_notification.delay(group_name, event)
-
-@receiver(post_save, sender=EnrollCourse)
-def instructor_assigned(sender, instance, created, **kwargs):    
-    if instance.is_instructor_assigned:
-        learner = instance.learner        
-        instructor = instance.instructor        
+        # For Instructor                
         message = f'New learner assigned {learner.full_name}'
         notif = Notification.objects.create(
             user=instructor.user,
@@ -110,6 +106,29 @@ def instructor_assigned(sender, instance, created, **kwargs):
         event = {
             'type': 'send_notification',
             'tag': NotificationTag.LEARNER_ASSIGNED,
+            'notification_id': notif.id,
+            'learner_id': learner.id,                                
+            'message': message
+        }
+        send_notification.delay(group_name, event)
+
+@receiver(post_save, sender=Slot)
+def slot_booked(sender, instance, created, **kwargs):
+    if instance.is_booked:
+        learner = instance.learner        
+        instructor = instance.instructor
+        tag = NotificationTag.SLOT_BOOKED        
+        message = f'Your slot has been booked by {learner.full_name}'
+        notif = Notification.objects.create(
+            user=instructor.user,
+            message=message,
+            tag=tag
+        )
+        notif.save()
+        group_name = f'notification_{instructor.user.id}'
+        event = {
+            'type': 'send_notification',
+            'tag': tag,
             'notification_id': notif.id,
             'learner_id': learner.id,                                
             'message': message

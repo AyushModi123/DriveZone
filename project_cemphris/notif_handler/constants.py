@@ -10,3 +10,4 @@ class NotificationTag:
     NEW_ENROLL = 'new_enroll'
     INSTRUCTOR_ASSIGNED = 'instructor_assigned'
     LEARNER_ASSIGNED = 'learner_assigned'
+    SLOT_BOOKED = 'slot_booked'
