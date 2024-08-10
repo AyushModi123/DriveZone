@@ -111,6 +111,7 @@ class Instructor(models.Model):
     user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='instructor', null=False, blank=False)
     school = models.ForeignKey('School', on_delete=models.CASCADE, null=False, blank=False, related_name='instructors')
     full_name = models.CharField(max_length=255, blank=False, null=False)
+    desc = models.TextField(blank=True, null=False, default="")
     location = models.CharField(max_length=2000, null=True, blank=False)
     image_url = models.URLField(null=False, blank=True, default='')    
     mobile_number = models.CharField(max_length=20, null=True, blank=False)
@@ -126,12 +127,12 @@ class Instructor(models.Model):
         """Returns fields that 
         contribute to profile completion level in format
         {'location': [fields]}
-        full_name, location, image_url, mobile_number, preferred_language, license, experience, area_of_expertise
+        full_name, location, image_url, mobile_number, preferred_language, license, experience, area_of_expertise, desc
         """
 
-        return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language", "experience", "area_of_expertise"], 
+        return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language", "experience", "area_of_expertise", "desc"], 
                 "user": ["license"]
-                }, 8
+                }, 9
     @property
     def get_completion_level(self):
         """This property directly depends on get_profile_fields property"""

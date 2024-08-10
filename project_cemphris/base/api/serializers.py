@@ -127,7 +127,7 @@ class OutInstructorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Instructor
-        fields = ['id', 'user', 'school', 'license', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise']
+        fields = ['id', 'user', 'school', 'license', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise', 'desc']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -167,9 +167,10 @@ class OutShortInstructorSerializer(serializers.ModelSerializer):
 
 class InstructorSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
+    desc = serializers.CharField(required=False, default="")    
     class Meta:
         model = Instructor
-        fields = ('email', 'full_name', 'location', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise',)
+        fields = ('email', 'full_name', 'location', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise', 'desc')
 
     def create(self, validated_data):
         is_active = validated_data.pop('is_active', False)
