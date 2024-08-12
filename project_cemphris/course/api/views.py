@@ -143,7 +143,7 @@ def get_enrollment(request):
         courses = Course.objects.filter(school=current_user.school, is_active=True)
         response_data = []
         for course in courses:
-            enrolled_entities = course.get_enrolled()
+            enrolled_entities = course.get_enrolled
             if enrolled_entities:
                 response_data.extend(OutEnrollCourseSerializer(enrolled_entities, many=True).data)
         return Response({"enrollments": response_data}, status=200)
