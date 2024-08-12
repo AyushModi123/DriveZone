@@ -319,7 +319,7 @@ class InstructorViewSet(viewsets.ViewSet):
             permission_classes.extend([IsSchoolPermission, RequiredProfileCompletionPermission(required_level=50)])
         return [permission() for permission in permission_classes]
     
-    @method_decorator(cache_page(settings.CACHE_TTL))
+    # @method_decorator(cache_page(settings.CACHE_TTL))
     def list(self, request):
         if request.user.is_authenticated and request.user.is_school:
             school = request.user.school
@@ -343,7 +343,7 @@ class InstructorViewSet(viewsets.ViewSet):
         # If pagination is not applied(for compatibility)
         return Response({'instructors': OutShortInstructorSerializer(instructors, many=True).data}, status=200)
 
-    @method_decorator(cache_page(settings.CACHE_TTL))
+    # @method_decorator(cache_page(settings.CACHE_TTL))
     def retrieve(self, request, pk=None):
         try:
             instructor = Instructor.objects.get(id=pk)
@@ -376,11 +376,24 @@ class InstructorViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=400)
 
     def update(self, request, pk=None):
+        current_user = request.user
         try:
-            instructor = Instructor.objects.get(id=pk)
+            instructor = Instructor.objects.get(id=pk, school=current_user.school)
         except Instructor.DoesNotExist:
             return Response({'error': 'Invalid Instructor ID'}, status=400)
         serializer = InstructorSerializer(instance=instructor, data=request.data)
+        if serializer.is_valid():
+            instructor = serializer.save()
+            return Response(status=204)
+        return Response(serializer.errors, status=400)
+
+    def partial_update(self, request, pk=None):     
+        current_user = request.user   
+        try:
+            instructor = Instructor.objects.get(id=pk, school=current_user.school)
+        except Instructor.DoesNotExist:
+            return Response({'error': 'Invalid Instructor ID'}, status=400)
+        serializer = InstructorSerializer(instance=instructor, data=request.data, partial=True)
         if serializer.is_valid():
             instructor = serializer.save()
             return Response(status=204)
