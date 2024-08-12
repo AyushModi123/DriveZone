@@ -11,7 +11,7 @@ from django.db.models import Q
 from project_cemphris.permissions import IsSchoolPermission, IsLearnerPermission, RequiredProfileCompletionPermission, BlockInstructorPermission
 from base.models import User, ProfileCompletionLevelChoices
 from course.models import Course, EnrollCourse
-from .serializers import CourseSerializer, OutCourseSerializer, EnrollCourseSerializer, OutShortEnrollCourseSerializer, OutEnrollCourseSerializer
+from .serializers import CourseSerializer, OutSchoolCourseSerializer, OutCourseSerializer, OutShortCourseSerializer, OutShortSchoolCourseSerializer, EnrollCourseSerializer, OutLearnerEnrollCourseSerializer, OutEnrollCourseSerializer
 from firebase_utils import FirebaseUploadImage
 
 logger = logging.getLogger(__file__)
@@ -30,14 +30,12 @@ class CourseViewSet(viewsets.ViewSet):
             permission_classes = common_permission_classes
         return [permission() for permission in permission_classes]
 
-    @method_decorator(cache_page(settings.CACHE_TTL * 10))
-    @method_decorator(vary_on_cookie)
     def list(self, request):
         current_user = request.user
         
-        if current_user.is_authenticated and current_user.is_school:
+        if current_user and current_user.is_authenticated and current_user.is_school:
             courses = Course.objects.filter(school=current_user.school)
-            return Response({"courses": OutCourseSerializer(courses, many=True).data}, status=200)
+            return Response({"courses": OutShortSchoolCourseSerializer(courses, many=True).data}, status=200)
         else:
             school_id = request.GET.get('school_id', None)
             if school_id is not None:
@@ -45,8 +43,8 @@ class CourseViewSet(viewsets.ViewSet):
                     school_id = int(school_id)
                 except (TypeError, ValueError):
                     return Response({"message": "Invalid School id"}, status=400)
-                courses = Course.objects.filter(school=school_id)
-                return Response({"courses": OutCourseSerializer(courses, many=True).data}, status=200)
+                courses = Course.objects.filter(school=school_id, is_active=True)
+                return Response({"courses": OutShortCourseSerializer(courses, many=True).data}, status=200)
             else:
                 return Response({"message": "Invalid School id"}, status=400)
 
@@ -59,11 +57,16 @@ class CourseViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=400)
     
     def retrieve(self, request, pk=None):
+        current_user = request.user
         try:
-            course = Course.objects.get(pk=pk)
+            if current_user and current_user.is_authenticated and current_user.is_school:            
+                course = Course.objects.get(pk=pk, school=current_user.school)            
+                return Response({"course": OutSchoolCourseSerializer(course, many=False).data}, status=200)
+            else:            
+                course = Course.objects.get(pk=pk, is_active=True)
+                return Response({"course": OutCourseSerializer(course, many=False).data}, status=200)
         except Course.DoesNotExist:
             return Response({"error": "Course not found"}, status=404)
-        return Response({"course": OutCourseSerializer(course, many=False).data}, status=200)
 
     def update(self, request, pk=None):
         current_user = request.user
@@ -71,14 +74,23 @@ class CourseViewSet(viewsets.ViewSet):
             course = Course.objects.get(pk=pk, school=current_user.school)
         except Course.DoesNotExist:
             return Response({"error": "Course not found"}, status=404)
-        serializer = CourseSerializer(data=request.data)
+        serializer = CourseSerializer(instance=course, data=request.data)
         if serializer.is_valid():
-            course = serializer.update(course, serializer.validated_data)
-            return Response({"course": OutCourseSerializer(course, many=False).data}, status=200)
+            course = serializer.save()
+            return Response(status=204)
         return Response(serializer.errors, status=400)
 
-    # def partial_update(self, request, pk=None):
-    #     pass
+    def partial_update(self, request, pk=None):
+        current_user = request.user
+        try:
+            course = Course.objects.get(pk=pk, school=current_user.school)
+        except Course.DoesNotExist:
+            return Response({"error": "Course not found"}, status=404)
+        serializer = CourseSerializer(instance=course, data=request.data, partial=True)
+        if serializer.is_valid():
+            course = serializer.save()
+            return Response(status=204)
+        return Response(serializer.errors, status=400)
 
     # def destroy(self, request, pk=None):
     #     current_user = request.user
@@ -124,14 +136,16 @@ def get_enrollment(request):
     if current_user.is_learner:
         try:
             enroll_course = EnrollCourse.objects.get(learner=current_user.learner)
-            return Response({"enrollment": OutShortEnrollCourseSerializer(enroll_course, many=False).data}, status=200)
+            return Response({"enrollment": OutLearnerEnrollCourseSerializer(enroll_course, many=False).data}, status=200)
         except EnrollCourse.DoesNotExist:
             return Response({"error": "Not Enrolled"}, status=404)
     elif current_user.is_school:        
-        courses = Course.objects.filter(school=current_user.school)
+        courses = Course.objects.filter(school=current_user.school, is_active=True)
         response_data = []
         for course in courses:
-            response_data.extend(OutEnrollCourseSerializer(course.learner_courses, many=True).data)
+            enrolled_entities = course.get_enrolled()
+            if enrolled_entities:
+                response_data.extend(OutEnrollCourseSerializer(enrolled_entities, many=True).data)
         return Response({"enrollments": response_data}, status=200)
     else:
         Response({'error': 'Permission Denied'}, status=403)
