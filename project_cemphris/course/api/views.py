@@ -116,6 +116,8 @@ def assign_instructor(request, pk=None):
         )
     except EnrollCourse.DoesNotExist:
         return Response({"error": "Enrollment Not Found"}, status=404)
+    if not enroll_course.is_confirm:
+        return Response({"message": "Confirm the enrollment before assigning instructor"}, status=400)
     serializer = EnrollCourseSerializer(instance=enroll_course, data=request.data)
     if serializer.is_valid():
         learner = serializer.validated_data['learner']

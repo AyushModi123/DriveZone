@@ -44,7 +44,7 @@ class OutLearnerEnrollCourseSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = EnrollCourse
-        fields = ('course', 'inst_name', 'inst_id', 'review_id', 'created_at', 'payment')
+        fields = ('course', 'inst_name', 'inst_id', 'review_id', 'created_at', 'payment', 'is_confirm')
 
     def get_inst_name(self, obj):
         return obj.instructor.full_name
@@ -69,7 +69,7 @@ class OutEnrollCourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EnrollCourse
-        fields = ('id', 'inst_name', 'learner_name', 'learner', 'course_id', 'course_name', 'instructor', 'payment', 'created_at')
+        fields = ('id', 'inst_name', 'learner_name', 'learner', 'course_id', 'course_name', 'instructor', 'payment', 'created_at', 'is_confirm')
     
     def get_inst_name(self, obj):
         return obj.instructor.full_name

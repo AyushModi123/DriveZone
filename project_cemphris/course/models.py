@@ -24,6 +24,7 @@ class EnrollCourse(models.Model):
     learner = models.OneToOneField('base.Learner', on_delete=models.CASCADE, related_name='learner_course')
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='learner_courses')
     instructor = models.ForeignKey('base.Instructor', on_delete=models.CASCADE, null=True, blank=False, related_name='learner_courses')
+    is_confirm = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
