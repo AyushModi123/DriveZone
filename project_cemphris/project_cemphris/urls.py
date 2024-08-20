@@ -46,7 +46,7 @@ urlpatterns = [
     path('api/vehicles/', include('vehicle.api.urls')),
     path('api/reviews/', include('review.api.urls')),
     path('api/courses/', include('course.api.urls')),
-    path('api/payments/', include('payment.api.urls')),
+    # path('api/payments/', include('payment.api.urls')),
     path('api/notifications/', include('notif_handler.api.urls')),
 ]
 

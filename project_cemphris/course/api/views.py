@@ -101,33 +101,6 @@ class CourseViewSet(viewsets.ViewSet):
     #     course.delete(keep_parents=True)
     #     return Response({"message": "Course deleted successfully"}, status=204)
     
-swagger_auto_schema(
-    method='POST',
-    request_body=EnrollCourseSerializer
-)
-@api_view(["POST"])
-@permission_classes([IsSchoolPermission])
-def assign_instructor(request, pk=None):
-    current_user = request.user
-    try:
-        enroll_course = EnrollCourse.objects.select_related("course").get(
-            Q(pk=pk) &
-            Q(course__school=current_user.school)
-        )
-    except EnrollCourse.DoesNotExist:
-        return Response({"error": "Enrollment Not Found"}, status=404)
-    if not enroll_course.is_confirm:
-        return Response({"message": "Confirm the enrollment before assigning instructor"}, status=400)
-    serializer = EnrollCourseSerializer(instance=enroll_course, data=request.data)
-    if serializer.is_valid():
-        learner = serializer.validated_data['learner']
-        course = serializer.validated_data['course']
-        if not (enroll_course.learner == learner and enroll_course.course == course):
-            return Response({"error": "Invalid course or learner id"}, status=404)        
-        enroll_course = serializer.save()
-        return Response({"message": "Instructor Assigned Successfully"}, status=200)
-    return Response(serializer.errors, status=400)
-
 @swagger_auto_schema(
         method='GET'
 )
@@ -151,3 +124,69 @@ def get_enrollment(request):
         return Response({"enrollments": response_data}, status=200)
     else:
         Response({'error': 'Permission Denied'}, status=403)
+
+@swagger_auto_schema(
+        method='PATCH'
+)
+@api_view(["PATCH"])
+@permission_classes([IsSchoolPermission])
+def update_enrollment(request, pk=None):
+    current_user = request.user    
+    try:
+        enroll_course = EnrollCourse.objects.get(
+            Q(pk=pk) &
+            Q(course__school=current_user.school)
+        )
+    except EnrollCourse.DoesNotExist:
+        return Response({"error": "Enrollment Not Found"}, status=404)    
+    serializer = EnrollCourseSerializer(instance=enroll_course, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()        
+        return Response({"message": "Enrollment Updated"}, status=200)
+    return Response(serializer.errors, status=400)
+
+@swagger_auto_schema(
+        method='POST'
+)
+@api_view(["POST"])
+@permission_classes([IsLearnerPermission])
+def enroll_course(request, pk=None):
+    current_user = request.user
+    try:
+        course = Course.objects.get(pk=pk, is_active=True)        
+    except Course.DoesNotExist:
+        return Response({"error": "Course not found"}, status=404)
+    serializer = EnrollCourseSerializer(learner=current_user.learner, course=course)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 'Enrolled Successfully'})
+    return Response(serializer.errors, status=400)
+
+        
+
+# swagger_auto_schema(
+#     method='POST',
+#     request_body=EnrollCourseSerializer
+# )
+# @api_view(["POST"])
+# @permission_classes([IsSchoolPermission])
+# def assign_instructor(request, pk=None):
+#     current_user = request.user
+#     try:
+#         enroll_course = EnrollCourse.objects.select_related("course").get(
+#             Q(pk=pk) &
+#             Q(course__school=current_user.school)
+#         )
+#     except EnrollCourse.DoesNotExist:
+#         return Response({"error": "Enrollment Not Found"}, status=404)
+#     if not enroll_course.is_confirm:
+#         return Response({"message": "Confirm the enrollment before assigning instructor"}, status=400)
+#     serializer = EnrollCourseSerializer(instance=enroll_course, data=request.data)
+#     if serializer.is_valid():
+#         learner = serializer.validated_data['learner']
+#         course = serializer.validated_data['course']
+#         if not (enroll_course.learner == learner and enroll_course.course == course):
+#             return Response({"error": "Invalid course or learner id"}, status=404)        
+#         enroll_course = serializer.save()
+#         return Response({"message": "Instructor Assigned Successfully"}, status=200)
+#     return Response(serializer.errors, status=400)

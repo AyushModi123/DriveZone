@@ -19,8 +19,7 @@ class Course(models.Model):
         except ObjectDoesNotExist:
             return None
     
-class EnrollCourse(models.Model):
-    payment = models.OneToOneField('payment.PaymentDetail', on_delete=models.CASCADE, related_name='enroll')
+class EnrollCourse(models.Model):    
     learner = models.OneToOneField('base.Learner', on_delete=models.CASCADE, related_name='learner_course')
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='learner_courses')
     instructor = models.ForeignKey('base.Instructor', on_delete=models.CASCADE, null=True, blank=False, related_name='learner_courses')

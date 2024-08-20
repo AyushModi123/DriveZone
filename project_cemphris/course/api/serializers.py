@@ -32,10 +32,12 @@ class OutCourseSerializer(serializers.ModelSerializer):
         fields = ('school', 'course_content', 'id', 'title', 'price')
 
 class EnrollCourseSerializer(serializers.ModelSerializer):
+    is_confirm = serializers.BooleanField(required=False)    
     class Meta:
         model = EnrollCourse
-        fields = ('learner', 'course', 'instructor')    
-    
+        fields = ('learner', 'course', 'instructor', 'is_confirm')
+        read_only_fields = ('learner', 'course')    
+
 class OutLearnerEnrollCourseSerializer(serializers.ModelSerializer):
     inst_name = serializers.SerializerMethodField()
     inst_id = serializers.SerializerMethodField()
@@ -44,7 +46,7 @@ class OutLearnerEnrollCourseSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = EnrollCourse
-        fields = ('course', 'inst_name', 'inst_id', 'review_id', 'created_at', 'payment', 'is_confirm')
+        fields = ('course', 'inst_name', 'inst_id', 'review_id', 'created_at', 'is_confirm')
 
     def get_inst_name(self, obj):
         return obj.instructor.full_name
@@ -69,7 +71,7 @@ class OutEnrollCourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EnrollCourse
-        fields = ('id', 'inst_name', 'learner_name', 'learner', 'course_id', 'course_name', 'instructor', 'payment', 'created_at', 'is_confirm')
+        fields = ('id', 'inst_name', 'learner_name', 'learner', 'course_id', 'course_name', 'instructor', 'created_at', 'is_confirm')
     
     def get_inst_name(self, obj):
         return obj.instructor.full_name
