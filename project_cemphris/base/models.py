@@ -36,13 +36,6 @@ class User(AbstractUser):
             return bool(self.instructor)
         except ObjectDoesNotExist:
             return False
-    
-    @property
-    def check_license(self):
-        try:
-            return bool(self.license)
-        except ObjectDoesNotExist:
-            return False
         
     @property
     def get_role_model(self):
@@ -78,12 +71,11 @@ class Learner(models.Model):
         """Returns fields that 
         contribute to profile completion level in format
         {'location': [fields]}
-        full_name, location, image_url, mobile_number, preferred_language, license
+        full_name, location, image_url, mobile_number, preferred_language
         """
 
-        return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language"], 
-                "user": ["license"]
-                }, 6
+        return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language"],
+                }, 5
     #Update logic here
     @property
     def get_completion_level(self):
@@ -93,10 +85,7 @@ class Learner(models.Model):
         for field in temp["current"]:
             value = getattr(self, field)
             if value in [None, '', [], {}]:
-                empty_fields += 1
-        for field in temp["user"]:
-            if not hasattr(self.user, field):
-                empty_fields+=1
+                empty_fields += 1        
         non_empty_fields = total_fields - empty_fields
         return (non_empty_fields/total_fields)*100
     
@@ -127,12 +116,11 @@ class Instructor(models.Model):
         """Returns fields that 
         contribute to profile completion level in format
         {'location': [fields]}
-        full_name, location, image_url, mobile_number, preferred_language, license, experience, area_of_expertise, desc
+        full_name, location, image_url, mobile_number, preferred_language, experience, area_of_expertise, desc
         """
 
-        return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language", "experience", "area_of_expertise", "desc"], 
-                "user": ["license"]
-                }, 9
+        return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language", "experience", "area_of_expertise", "desc"],                
+                }, 8
     @property
     def get_completion_level(self):
         """This property directly depends on get_profile_fields property"""
@@ -141,10 +129,7 @@ class Instructor(models.Model):
         for field in temp["current"]:
             value = getattr(self, field)
             if value in [None, '', [], {}]:
-                empty_fields += 1
-        for field in temp["user"]:
-            if not hasattr(self.user, field):
-                empty_fields+=1
+                empty_fields += 1        
         non_empty_fields = total_fields - empty_fields
         return (non_empty_fields/total_fields)*100
     
@@ -187,19 +172,6 @@ class School(models.Model):
                 empty_fields+=1
         non_empty_fields = total_fields - empty_fields
         return (non_empty_fields/total_fields)*100
-
-class LicenseInformation(models.Model):    
-    
-    user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='license')
-    number = models.CharField(max_length=50, null=False, blank=False, primary_key=True)
-    # photo
-    image_url = models.URLField(null=False, blank=True, default='')
-    type = models.CharField(choices=LicenseTypeChoices.choices, null=False, blank=False)
-    expiration_date = models.DateField(null=False, blank=False)
-    issuing_authority = models.CharField(choices=LicenseIssuingAuthorityChoices.choices, blank=False, null=False)
-
-    def __str__(self):
-        return self.number
 
 class ActivationMailHistory(models.Model):
     email = models.EmailField(unique=True, null=False, blank=False, db_index=True)

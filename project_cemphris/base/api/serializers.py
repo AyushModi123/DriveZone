@@ -83,11 +83,10 @@ class OutLicenseInformationSerializer(serializers.ModelSerializer):
         fields = ('number', 'type', 'expiration_date', 'issuing_authority', 'image_url')
 
 class OutLearnerSerializer(serializers.ModelSerializer):
-    user = OutUserSerializer()
-    license = OutLicenseInformationSerializer(allow_null=True)
+    user = OutUserSerializer()    
     class Meta:
         model = Learner
-        fields = ('id', 'user', 'full_name', 'license', 'location', 'image_url', 'mobile_number', 'preferred_language')
+        fields = ('id', 'user', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language')
 
 class SchoolSerializer(serializers.ModelSerializer):        
     class Meta:
@@ -121,13 +120,12 @@ class OutShortSchoolSerializer(serializers.ModelSerializer):
 
 class OutInstructorSerializer(serializers.ModelSerializer):
     user = OutUserSerializer()
-    school = OutSchoolSerializer()
-    license = OutLicenseInformationSerializer(allow_null=True)
+    school = OutSchoolSerializer()    
     area_of_expertise = serializers.SerializerMethodField()
 
     class Meta:
         model = Instructor
-        fields = ['id', 'user', 'school', 'license', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise', 'desc']
+        fields = ['id', 'user', 'school', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise', 'desc']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -141,22 +139,6 @@ class OutInstructorSerializer(serializers.ModelSerializer):
     def get_area_of_expertise(self, obj):
         """Called for area_of_expertise serializer field"""
         return obj.get_area_of_expertise_display()
-
-class LicenseInformationSerializer(serializers.ModelSerializer):    
-    class Meta:
-        model = LicenseInformation
-        fields = ('number', 'type', 'expiration_date', 'issuing_authority',)
-    
-    def create(self, validated_data):
-        image_url = validated_data.pop('image_url')
-        user = validated_data.pop('user')
-        license = LicenseInformation.objects.create(user=user, image_url=image_url, **validated_data)
-        return license
-
-    def update(self, validated_data):
-        image_url = validated_data.pop('image_url')
-        license = LicenseInformation.objects.update(image_url=image_url, **validated_data)
-        return license
 
 class OutShortInstructorSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)

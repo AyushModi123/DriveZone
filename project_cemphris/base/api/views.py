@@ -284,33 +284,6 @@ def get_user_details(request):
     else:
         return Response({'role': current_user.role}, status=200)
 
-@swagger_auto_schema(
-    method='post',
-    request_body=LicenseInformationSerializer,    
-)
-@api_view(['POST'])
-@permission_classes([BlockSchoolPermission])
-def upload_license(request):
-    current_user = request.user
-    serializer = LicenseInformationSerializer(data=request.data)
-    image_data = request.FILES.get("image", None)    
-    if serializer.is_valid():        
-        image_url = ""
-        if image_data is not None:
-            image_serializer = ImageUploadSerializer(data=request.FILES)
-            if image_serializer.is_valid():
-                image_file = image_serializer.validated_data.get('image')
-                image_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
-            else:
-                return Response(image_serializer.errors, status=400)
-        license = serializer.save(
-            image_url=image_url, 
-            user=current_user
-            )
-        return Response({'message': 'License uploaded successfully', 'image_url': image_url, 'license_id': license.pk}, status=201)
-    else:
-        return Response(serializer.errors, status=400)
-    
 @swagger_auto_schema()
 class InstructorViewSet(viewsets.ViewSet):    
     def get_permissions(self):
@@ -443,41 +416,3 @@ def check_api(request):
     print('HTTP_X_FORWARDED_FOR--', request.META.get('HTTP_X_FORWARDED_FOR', None))
     print(request.META)
     return Response("Working")
-# @api_view(['PUT'])
-# def update_details(request):
-#     current_user = request.user
-#     if request.user.is_learner:
-#         serializer = LearnerDetailsSerializer(instance=request.user.learner, data=request.data)
-#     elif request.user.is_instructor:
-#         serializer = InstructorDetailsSerializer(instance=request.user.instructor, data=request.data)
-#     else:
-#         return Response({"message": "Invalid User"}, status=400)
-#     if serializer.is_valid():
-#         _ = serializer.save(user=current_user)
-#         current_user.save()
-#         return Response({"message": "Details Updated Successfully"}, status=200)
-#     return Response(serializer.errors, status=400)
-
-# @swagger_auto_schema(
-#     method='put',
-#     request_body=LicenseInformationSerializer,    
-# )
-# @api_view(['PUT'])
-# def update_license(request):
-#     current_user = request.user
-#     license = None
-#     if request.user.check_license:
-#         license = request.user.license
-#     serializer = LicenseInformationSerializer(instance=license, data=request.data)
-#     if serializer.is_valid():
-#         image_file = request.FILES.get('image', None)
-#         img_url =''
-#         if image_file:
-#             img_url = FirebaseUploadImage.upload_image(image_file, 'licenses')
-#         _ = serializer.save(
-#             user=request.user,
-#             image_url=img_url
-#         )        
-#         current_user.save()
-#         return Response({"message": "Details Updated Successfully"}, status=200)
-#     return Response(serializer.errors, status=400)
