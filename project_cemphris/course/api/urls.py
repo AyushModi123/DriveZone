@@ -5,9 +5,9 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 
 router.register(r'', viewset=views.CourseViewSet, basename="")
+router.register(r'enroll', viewset=views.EnrollCourseViewSet, basename="enroll")
+
 urlpatterns = [
-    path('enroll/<int:pk>/assign-instructor/', views.assign_instructor, name='assign_instructor'),
-    path('enroll/', views.get_enrollment, name='get_enrollments'),
 ]
 
 urlpatterns+=router.urls

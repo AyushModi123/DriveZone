@@ -100,67 +100,68 @@ class CourseViewSet(viewsets.ViewSet):
     #         return Response({"error": "Course not found"}, status=404)
     #     course.delete(keep_parents=True)
     #     return Response({"message": "Course deleted successfully"}, status=204)
+
+@swagger_auto_schema()
+class EnrollCourseViewSet(viewsets.ViewSet):    
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        common_permission_classes = []
+        if self.action == 'list':
+            common_permission_classes = [BlockInstructorPermission]
+        elif self.action == 'partial_update':
+            common_permission_classes = [IsSchoolPermission]
+        elif self.action == 'create':
+            common_permission_classes = [IsLearnerPermission]
+        return [permission() for permission in common_permission_classes]
     
-@swagger_auto_schema(
-        method='GET'
-)
-@api_view(["GET"])
-@permission_classes([BlockInstructorPermission])
-def get_enrollment(request):
-    current_user = request.user
-    if current_user.is_learner:
+    def list(self, request):
+        current_user = request.user
+        if current_user.is_learner:
+            try:
+                enroll_course = EnrollCourse.objects.get(learner=current_user.learner)
+                return Response({"enrollment": OutLearnerEnrollCourseSerializer(enroll_course, many=False).data}, status=200)
+            except EnrollCourse.DoesNotExist:
+                return Response({"error": "Not Enrolled"}, status=404)
+        elif current_user.is_school:        
+            courses = Course.objects.filter(school=current_user.school, is_active=True)
+            response_data = []
+            for course in courses:
+                enrolled_entities = course.get_enrolled
+                if enrolled_entities:
+                    response_data.extend(OutEnrollCourseSerializer(enrolled_entities, many=True).data)
+            return Response({"enrollments": response_data}, status=200)
+        else:
+            return Response({'error': 'Permission Denied'}, status=403)
+
+    def create(self, request, pk=None):
+        current_user = request.user
         try:
-            enroll_course = EnrollCourse.objects.get(learner=current_user.learner)
-            return Response({"enrollment": OutLearnerEnrollCourseSerializer(enroll_course, many=False).data}, status=200)
+            course = Course.objects.get(pk=pk, is_active=True)        
+        except Course.DoesNotExist:
+            return Response({"error": "Course not found"}, status=404)
+        serializer = EnrollCourseSerializer(learner=current_user.learner, course=course)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Enrolled Successfully'})
+        return Response(serializer.errors, status=400)
+    
+    def partial_update(self, request, pk=None):
+        current_user = request.user    
+        try:
+            enroll_course = EnrollCourse.objects.get(
+                Q(pk=pk) &
+                Q(course__school=current_user.school)
+            )
         except EnrollCourse.DoesNotExist:
-            return Response({"error": "Not Enrolled"}, status=404)
-    elif current_user.is_school:        
-        courses = Course.objects.filter(school=current_user.school, is_active=True)
-        response_data = []
-        for course in courses:
-            enrolled_entities = course.get_enrolled
-            if enrolled_entities:
-                response_data.extend(OutEnrollCourseSerializer(enrolled_entities, many=True).data)
-        return Response({"enrollments": response_data}, status=200)
-    else:
-        Response({'error': 'Permission Denied'}, status=403)
-
-@swagger_auto_schema(
-        method='PATCH'
-)
-@api_view(["PATCH"])
-@permission_classes([IsSchoolPermission])
-def update_enrollment(request, pk=None):
-    current_user = request.user    
-    try:
-        enroll_course = EnrollCourse.objects.get(
-            Q(pk=pk) &
-            Q(course__school=current_user.school)
-        )
-    except EnrollCourse.DoesNotExist:
-        return Response({"error": "Enrollment Not Found"}, status=404)    
-    serializer = EnrollCourseSerializer(instance=enroll_course, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()        
-        return Response({"message": "Enrollment Updated"}, status=200)
-    return Response(serializer.errors, status=400)
-
-@swagger_auto_schema(
-        method='POST'
-)
-@api_view(["POST"])
-@permission_classes([IsLearnerPermission])
-def enroll_course(request, pk=None):
-    current_user = request.user
-    try:
-        course = Course.objects.get(pk=pk, is_active=True)        
-    except Course.DoesNotExist:
-        return Response({"error": "Course not found"}, status=404)
-    serializer = EnrollCourseSerializer(learner=current_user.learner, course=course)
-    if serializer.is_valid():
-        serializer.save()
-        return Response({'message': 'Enrolled Successfully'})
-    return Response(serializer.errors, status=400)
+            return Response({"error": "Enrollment Not Found"}, status=404)    
+        serializer = EnrollCourseSerializer(instance=enroll_course, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()        
+            return Response({"message": "Enrollment Updated"}, status=200)
+        return Response(serializer.errors, status=400)
 
         
 
