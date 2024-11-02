@@ -1,11 +1,28 @@
 from rest_framework import serializers
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from project_cemphris.serializers import OutCourseSerializer
+from django.core.validators import FileExtensionValidator
 from base.choices import RoleChoices
 from base.models import Instructor, LicenseInformation, Learner, School
 
 User = get_user_model()
+
+class ImageUploadSerializer(serializers.Serializer):
+    image = serializers.ImageField(
+        validators=[
+            FileExtensionValidator(allowed_extensions=settings.ALLOWED_IMAGE_EXTENSIONS)
+        ]
+    )
+
+    def validate_image(self, value):
+        # Check the file size
+        if value.size > settings.MAX_IMAGE_FILE_SIZE:
+            raise serializers.ValidationError(f"File size exceeds the maximum limit of {settings.MAX_IMAGE_FILE_SIZE / (1024 * 1024)} MB.")
+        return value
+
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -17,8 +34,9 @@ class UserSerializer(serializers.ModelSerializer):
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Password fields didn't match."})
-        # add instructor validation to not create instructor
+            raise serializers.ValidationError({"password": "Password fields didn't match."})        
+        if attrs['role'] == 'instructor':
+            raise serializers.ValidationError({"role": "Invalid role"})
         return attrs
 
     def create(self, validated_data):
@@ -37,10 +55,22 @@ class OutUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'role', 'profile_completion_level', 'is_active')
 
-class LearnerSerializer(serializers.ModelSerializer):    
+class ResetPasswordSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True, required=True)
+    class Meta:
+        model = User
+        fields = ('password', 'password2')
+    
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})        
+        return attrs
+
+class LearnerSerializer(serializers.ModelSerializer):        
     class Meta:
         model = Learner
-        fields = ['full_name', 'location', 'mobile_number', 'preferred_language']
+        fields = ['full_name', 'location', 'mobile_number', 'preferred_language',]
 
     def create(self, validated_data):
         user = validated_data.pop('user')
@@ -55,16 +85,14 @@ class OutLicenseInformationSerializer(serializers.ModelSerializer):
 class OutLearnerSerializer(serializers.ModelSerializer):
     user = OutUserSerializer()
     license = OutLicenseInformationSerializer(allow_null=True)
-    course = OutCourseSerializer(allow_null=True)
     class Meta:
         model = Learner
-        fields = ('id', 'user', 'course', 'full_name', 'license', 'location', 'image_url', 'mobile_number', 'preferred_language')
+        fields = ('id', 'user', 'full_name', 'license', 'location', 'image_url', 'mobile_number', 'preferred_language')
 
-class SchoolSerializer(serializers.ModelSerializer):    
-
+class SchoolSerializer(serializers.ModelSerializer):        
     class Meta:
         model = School
-        fields = ['name', 'location', 'mobile_number', 'preferred_language']
+        fields = ['name', 'location', 'mobile_number', 'preferred_language', 'desc',]
     
     def create(self, validated_data):        
         user = validated_data.pop('user')
@@ -76,7 +104,7 @@ class OutSchoolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = School
-        fields = ['id', 'user', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language']
+        fields = ['id', 'user', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'desc']
 
 class OutVeryShortSchoolSerializer(serializers.ModelSerializer):
 
@@ -88,7 +116,7 @@ class OutShortSchoolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = School
-        fields = ['id', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language']
+        fields = ['id', 'name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'desc']
 
 
 class OutInstructorSerializer(serializers.ModelSerializer):
@@ -99,7 +127,7 @@ class OutInstructorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Instructor
-        fields = ['id', 'user', 'school', 'license', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise']
+        fields = ['id', 'user', 'school', 'license', 'full_name', 'location', 'image_url', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise', 'desc']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -117,7 +145,7 @@ class OutInstructorSerializer(serializers.ModelSerializer):
 class LicenseInformationSerializer(serializers.ModelSerializer):    
     class Meta:
         model = LicenseInformation
-        fields = ('number', 'type', 'expiration_date', 'issuing_authority')
+        fields = ('number', 'type', 'expiration_date', 'issuing_authority',)
     
     def create(self, validated_data):
         image_url = validated_data.pop('image_url')
@@ -139,9 +167,10 @@ class OutShortInstructorSerializer(serializers.ModelSerializer):
 
 class InstructorSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
+    desc = serializers.CharField(required=False, default="")    
     class Meta:
         model = Instructor
-        fields = ('email', 'full_name', 'location', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise')
+        fields = ('email', 'full_name', 'location', 'mobile_number', 'preferred_language', 'experience', 'area_of_expertise', 'desc')
 
     def create(self, validated_data):
         is_active = validated_data.pop('is_active', False)

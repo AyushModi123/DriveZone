@@ -19,20 +19,21 @@ from django.urls import path, include
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
+from notif_handler.consumers import NotificationConsumer
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Project Cemphris Title",
-        default_version='v1',
-        description="Your API description",
-        terms_of_service="https://www.example.com/policies/terms/",
-        contact=openapi.Contact(email="contact@example.com"),
+        title="Project Cemphris",
+        default_version='v0',
+        description="project-cemphris apis",
+        # terms_of_service="https://www.example.com/policies/terms/",
+        # contact=openapi.Contact(email="contact@example.com"),
         license=openapi.License(name="BSD License"),
     ),
-    public=True,
-    permission_classes=[],
+    public=False,
+    permission_classes=[IsAuthenticated, IsAdminUser],
     authentication_classes=[SessionAuthentication],
 )
 
@@ -43,12 +44,17 @@ urlpatterns = [
     # path('api/bookings/', include('booking.api.urls')),
     path('api/slots/', include('slot.api.urls')),
     path('api/vehicles/', include('vehicle.api.urls')),
-    path('api/review/', include('review.api.urls')),
+    path('api/reviews/', include('review.api.urls')),
     path('api/courses/', include('course.api.urls')),
     path('api/payments/', include('payment.api.urls')),
+    path('api/notifications/', include('notif_handler.api.urls')),
 ]
 
 #Swagger Docs
 urlpatterns+= [    
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
+]
+
+websocket_urlpatterns = [
+    path("ws/notifications/", NotificationConsumer.as_asgi())
 ]

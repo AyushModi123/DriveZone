@@ -1,7 +1,8 @@
 from rest_framework import serializers
+from base.api.serializers import ImageUploadSerializer
 from vehicle.models import Vehicle
 
-class VehicleSerializer(serializers.ModelSerializer):    
+class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
         fields = ('model', 'make', 'type', 'plate_no')

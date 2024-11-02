@@ -10,7 +10,7 @@ from .choices import ProfileCompletionLevelChoices, LicenseIssuingAuthorityChoic
 class User(AbstractUser):    
     username = models.CharField(null=False, blank=True, unique=False, default="")
     profile_completion_level = models.PositiveSmallIntegerField(validators=[MaxValueValidator(100)], null=False, blank=False, default=10)
-    email = models.EmailField(unique=True, null=False, blank=False)
+    email = models.EmailField(unique=True, null=False, blank=False, db_index=True)
     role = models.CharField(max_length=50, choices=RoleChoices.choices, null=False, blank=False)
     # TODO: set role as editable false later
     USERNAME_FIELD = 'email'
@@ -53,7 +53,14 @@ class User(AbstractUser):
         elif self.is_school:
             return self.school
         else:
-            return None        
+            return None    
+
+    @property
+    def has_any_notifications(self):
+        try:
+            return bool(self.notifications)
+        except ObjectDoesNotExist:
+            return False
 
 class Learner(models.Model):
     user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='learner', null=False, blank=False)
@@ -104,6 +111,7 @@ class Instructor(models.Model):
     user: User  = models.OneToOneField('User', on_delete=models.CASCADE, related_name='instructor', null=False, blank=False)
     school = models.ForeignKey('School', on_delete=models.CASCADE, null=False, blank=False, related_name='instructors')
     full_name = models.CharField(max_length=255, blank=False, null=False)
+    desc = models.TextField(blank=True, null=False, default="")
     location = models.CharField(max_length=2000, null=True, blank=False)
     image_url = models.URLField(null=False, blank=True, default='')    
     mobile_number = models.CharField(max_length=20, null=True, blank=False)
@@ -119,12 +127,12 @@ class Instructor(models.Model):
         """Returns fields that 
         contribute to profile completion level in format
         {'location': [fields]}
-        full_name, location, image_url, mobile_number, preferred_language, license, experience, area_of_expertise
+        full_name, location, image_url, mobile_number, preferred_language, license, experience, area_of_expertise, desc
         """
 
-        return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language", "experience", "area_of_expertise"], 
+        return {"current": ["full_name", "location", "image_url", "mobile_number", "preferred_language", "experience", "area_of_expertise", "desc"], 
                 "user": ["license"]
-                }, 8
+                }, 9
     @property
     def get_completion_level(self):
         """This property directly depends on get_profile_fields property"""
@@ -143,7 +151,8 @@ class Instructor(models.Model):
     
 class School(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='school')
-    name = models.CharField(max_length=500, blank=False, null=False)    
+    name = models.CharField(max_length=500, blank=False, null=False)
+    desc = models.TextField(blank=True, null=False, default="")
     location = models.CharField(max_length=2000, null=True, blank=True)
     image_url = models.URLField(null=False, blank=True, default='')
     mobile_number = models.CharField(max_length=20, null=True, blank=False)
@@ -192,4 +201,9 @@ class LicenseInformation(models.Model):
     def __str__(self):
         return self.number
 
-#plans
+class ActivationMailHistory(models.Model):
+    email = models.EmailField(unique=True, null=False, blank=False, db_index=True)
+    sent_count = models.SmallIntegerField(default=0, null=False, blank=False)
+
+    def __str__(self):
+        return f"{self.email} -> {self.sent_count}"

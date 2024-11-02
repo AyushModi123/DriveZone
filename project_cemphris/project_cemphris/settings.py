@@ -13,12 +13,12 @@ from datetime import timedelta
 from pathlib import Path
 import dj_database_url
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(os.path.join(BASE_DIR, '.env'))
+# load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -27,13 +27,14 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", 0) == "1"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
   'http://localhost:3000',
+  'https://drivezone.vercel.app'
 )
 # Application definition
 
@@ -54,12 +55,15 @@ INSTALLED_APPS = [
     # 'booking.apps.BookConfig',
     'slot.apps.SlotConfig',
     'course.apps.CourseConfig',
+    'notif_handler.apps.NotifHandlerConfig',
+    'prog_track.apps.ProgTrackConfig',
     'rest_framework_swagger',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
     'channels',
     'drf_yasg',
+    'django_celery_beat',
     # 'django_extensions', # Enable to generate ER Diag
 ]
 
@@ -82,11 +86,20 @@ FILER_MIME_TYPE_WHITELIST = [
     "image/png",
 ]
 
+ALLOWED_IMAGE_EXTENSIONS = [
+    'jpg',
+    'jpeg',
+    'png',
+    'webp',
+    'jfif',
+]
+MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024  # Bytes
+
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=15),
     'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
-    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=15),
     'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
 }
 
@@ -129,9 +142,24 @@ ASGI_APPLICATION = 'project_cemphris.asgi.application'
 
 DATABASES = {
     'default':
-        dj_database_url.config(default=os.environ.get("DATABASE_URL"))
+        dj_database_url.config() # DATABASE_URL env 
 }
 
+FIXTURE_DIRS = [f'{BASE_DIR}/fixtures']
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("CACHE_BACKEND"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        "KEY_PREFIX": "pc"
+    }
+}
+# Cache time to live is 10 minutes.
+CACHE_TTL = 60 * 10
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -151,6 +179,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Password reset and Email Activation Timeout
+PASSWORD_RESET_TIMEOUT = (60*60)//2  # 30 minutes
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -177,20 +207,29 @@ STATIC_ROOT = BASE_DIR / 'static_files'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels.layers.InMemoryChannelLayer',
+#     }
+# }
+
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    }
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.getenv("CHANNEL_BACKEND"))],
+        },
+    },
 }
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [("127.0.0.1", 6379)],
-#         },
-#     },
-# }
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_BACKEND')
+CELERY_BEAT_SCHEDULE = {
+    'send-scheduled-emails': {
+        'task': 'notif_handler.tasks.send_scheduled_emails',
+        'schedule': 300.0,  # In seconds
+    },
+}
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -198,25 +237,47 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
 # PAYMENT_VARIANTS = {
 #     'razorpay': ('django_payments_razorpay.RazorPayProvider', {
 #         'public_key': 'RAZORPAY_PUBLIC_KEY',
 #         'secret_key': 'RAZORPAY_SECRET_KEY'})}
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header',
-            'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
-        }
-    },
-    'USE_SESSION_AUTH': True,
-}
+# SWAGGER_SETTINGS = {
+#     'SECURITY_DEFINITIONS': {
+#         'Bearer': {
+#             'type': 'apiKey',
+#             'name': 'Authorization',
+#             'in': 'header',
+#             'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
+#         }
+#     },
+#     'USE_SESSION_AUTH': True,
+# }
 
 GRAPH_MODELS = {
     'all_applications': True,
     'group_models': True,
+}
+
+# Logging Settings
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'django_debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }

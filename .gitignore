@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# nginx
+project_cemphris/nginx/*
+
 # C extensions
 *.so
 

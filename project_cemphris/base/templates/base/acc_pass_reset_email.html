@@ -1,0 +1,21 @@
+{% autoescape off %}
+
+Dear user,
+
+Your password has been successfully reset on your account.
+
+Details:
+- Time: {{ reset_time }}
+- IP Address: {{ ip_address }}
+
+If you did not initiate this password reset, please contact our support team immediately.
+
+Thank you for using our service!
+
+Best regards,
+The {{ site_name }} Team
+
+------------------------------------
+If you have any questions, please contact us at {{ support_email }}.
+
+{% endautoescape %}

@@ -17,8 +17,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_cemphris.settings')
 
 import django
 django.setup()
-# from base.urls import websocket_urlpatterns
-websocket_urlpatterns = []
+
+from project_cemphris.urls import websocket_urlpatterns
 
 # application = get_asgi_application()
 
@@ -26,9 +26,8 @@ application = ProtocolTypeRouter({
     'http': get_asgi_application(),
     # WebSocket chat handler
     'websocket': AllowedHostsOriginValidator(
-        AuthMiddlewareStack(
         URLRouter(
             websocket_urlpatterns
         )
-    )),
+    ),
 })

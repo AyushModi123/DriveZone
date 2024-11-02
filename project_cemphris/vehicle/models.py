@@ -13,3 +13,7 @@ class Vehicle(models.Model):
     def __str__(self):
         return f"id: {self.id}->{self.get_make_display()} with model {self.model}"
     
+    class Meta:        
+        constraints = [
+            models.UniqueConstraint(fields=['plate_no'], name='unique_plate_no')
+        ]

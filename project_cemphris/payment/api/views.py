@@ -1,3 +1,4 @@
+import logging
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -5,6 +6,10 @@ from project_cemphris.permissions import IsLearnerPermission
 from payment.models import PaymentDetail
 from .serializers import PaymentSerializer
 from payment.choices import PaymentStatusTypeChoices
+from course.models import Course
+
+logger = logging.getLogger(__file__)
+
 
 @swagger_auto_schema(
     method='post',
@@ -20,7 +25,8 @@ def checkout(request):
     except PaymentDetail.DoesNotExist:
         serializer = PaymentSerializer(data=request.data)
         if serializer.is_valid():
-            payment = serializer.save(learner=current_user.learner, status=PaymentStatusTypeChoices.COMPLETE)
+            course = serializer.validated_data.get("course")
+            payment = serializer.save(learner=current_user.learner, school=course.school, status=PaymentStatusTypeChoices.COMPLETE)
             return Response({"message": "Payment Successful", "payment_id": payment.id}, status=200)
         return Response(serializer.errors, status=400)
 
